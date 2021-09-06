@@ -39,11 +39,11 @@ HeliumHotspot _$HeliumHotspotFromJson(Map<String, dynamic> json) =>
       locationHex: json['location_hex'] as String?,
       name: json['name'] as String,
       nonce: json['nonce'] as int,
-      speculativeNonce: json['speculative_nonce'] as int?,
+      speculativeNonce: json['speculative_nonce'] as num?,
       timestampAdded:
           heliumTimestampFromJson(json['timestamp_added'] as String),
       rewardScale: (json['reward_scale'] as num?)?.toDouble(),
-      payer: json['payer'] as String,
+      payer: json['payer'] as String?,
       owner: json['owner'] as String,
       mode: json['mode'] as String,
       status:

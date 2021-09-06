@@ -9,6 +9,7 @@ class HeliumClient {
 
   final Uri _base;
 
+  /// Operatons on the Hotspots API. (https://docs.helium.com/api/blockchain/hotspots)
   late final HeliumHotspotClient hotspots;
 
   HeliumClient({
@@ -18,7 +19,8 @@ class HeliumClient {
   }
 
   Future<HeliumResponse<T>> _doRequest<T>(final HeliumRequest<T> req) async {
-    final resp = await http.get(req.getUri(_base));
+    final uri = req.getUri(_base);
+    final resp = await http.get(uri);
     final Map<String, dynamic> result = json.decode(resp.body);
 
     if (result.containsKey('cursor')) {
@@ -34,7 +36,6 @@ class HeliumClient {
   Future<HeliumPagedResponse<T>> _doPagedRequest<T>(
       final HeliumPagedRequest<T> req) async {
     final uri = req.getUri(_base);
-    print(uri);
     final resp = await http.get(uri);
     final Map<String, dynamic> result = json.decode(resp.body);
     final cursor = result['cursor'] as String?;
@@ -58,7 +59,7 @@ class HeliumClient {
   */
 }
 
-/// Operations of the Hotspots API.
+/// Operations on the Hotspots API.
 /// https://docs.helium.com/api/blockchain/hotspots
 class HeliumHotspotClient {
   final HeliumClient _client;
@@ -100,6 +101,39 @@ class HeliumHotspotClient {
       String name) async {
     return _client._doRequest(HeliumRequest(
       path: '/v1/hotspots/name/$name',
+      extractResponse: (json) => HeliumRequest.mapDataList(
+          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+    ));
+  }
+
+  /// Fetches the hotspots which mach a search term in the [term] parameter.
+  ///
+  /// The [term] parameter needs to be at least one character, with 3 or more
+  /// recommended.
+  Future<HeliumResponse<List<HeliumHotspot>>> searchHotspotsForName(
+      String term) async {
+    if (term.isEmpty) {
+      throw ArgumentError.value(term, 'term',
+          'The `term` parameter must be at least one character in length.');
+    }
+
+    return _client._doRequest(HeliumRequest(
+      path: '/v1/hotspots/name?search=$term',
+      extractResponse: (json) => HeliumRequest.mapDataList(
+          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+    ));
+  }
+
+  /// Fetches the hotspots which are withing a given number of metres from the
+  /// given [lat] and [lon] coordinates.
+  ///
+  /// The [lat] and [lon] coordinates are measured in degrees.
+  /// The [distance] is measured in metres.
+  Future<HeliumPagedResponse<List<HeliumHotspot>>> searchHotspotsByDistance(
+      double lat, double lon, int distance) async {
+    return _client._doPagedRequest(HeliumPagedRequest(
+      path:
+          '/v1/hotspots/location/distance?lat=$lat&lon=$lon&distance=$distance',
       extractResponse: (json) => HeliumRequest.mapDataList(
           json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
     ));

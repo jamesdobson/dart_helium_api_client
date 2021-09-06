@@ -35,6 +35,47 @@ void main() {
           DateTime.parse('2020-01-20T19:39:17.000000Z'));
     });
 
+    test('Gets hotspots with a given name', () async {
+      final resp = await client.hotspots.getHotspotsForName('soft-candy-orca');
+
+      expect(resp.data.length, greaterThan(1));
+
+      final addresses = resp.data.map((e) => e.address).toList();
+
+      expect(addresses,
+          contains('11WyZvf5guoDJxHcECTarnjWEZJsmH1pU5466pya98CMVjeD9Ev'));
+      expect(addresses,
+          contains('112F3zbUkrftbJGnYgJxoHr8XEEkN4LEEqtcPWZmLnAjVNeME9De'));
+      expect(addresses,
+          contains('11HETWHUhfVFq94KYM4NeioGzjotFdqPVgSamFWf5mQi1SQBMBa'));
+    });
+
+    test('Searches for hotspots given a search term', () async {
+      final resp = await client.hotspots.searchHotspotsForName('old plum');
+
+      expect(resp.data.length, greaterThan(1));
+
+      final names = resp.data.map((e) => e.name).toList();
+
+      expect(names, contains('old-plum-horse'));
+      expect(names, contains('old-plum-loris'));
+      expect(names, contains('cold-plum-bird'));
+    });
+
+    test('Search for hotspots within a distance of a given lat/lon coordinate',
+        () async {
+      final resp1 =
+          await client.hotspots.getHotspotForAddress(CHEESY_BRICK_MUSTANG);
+      final hotspotLat = resp1.data.lat!;
+      final hotspotLon = resp1.data.lng!;
+
+      final resp2 = await client.hotspots
+          .searchHotspotsByDistance(hotspotLat, hotspotLon, 1000);
+
+      expect(resp2.data.first.address, CHEESY_BRICK_MUSTANG);
+      expect(resp2.data.length, greaterThan(1));
+    });
+
     test('Currently elected hotspots is empty', () async {
       final resp = await client.hotspots.getCurrentlyElectedHotspots();
 

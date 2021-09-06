@@ -53,8 +53,12 @@ class HeliumHotspot {
   final String? locationHex;
   final String name;
   final int nonce;
+
+  /// [speculativeNonce] can sometimes be a double due to a bug in the Helium
+  /// API in which the distance of a hotspot from a searched location is
+  /// reported in [speculativeNonce] instead of its own field.
   @JsonKey(name: 'speculative_nonce')
-  final int? speculativeNonce;
+  final num? speculativeNonce;
   @JsonKey(
       name: 'timestamp_added',
       fromJson: heliumTimestampFromJson,
@@ -62,7 +66,7 @@ class HeliumHotspot {
   final DateTime timestampAdded;
   @JsonKey(name: 'reward_scale')
   final double? rewardScale;
-  final String payer;
+  final String? payer;
   final String owner;
   final String mode;
   final HeliumHotspotStatus status;
