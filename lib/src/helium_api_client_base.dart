@@ -9,7 +9,7 @@ class HeliumClient {
 
   final Uri _base;
 
-  /// Operatons on the Hotspots API. (https://docs.helium.com/api/blockchain/hotspots)
+  /// Operations on the Hotspots API. (https://docs.helium.com/api/blockchain/hotspots)
   late final HeliumHotspotClient hotspots;
 
   HeliumClient({
@@ -106,19 +106,19 @@ class HeliumHotspotClient {
     ));
   }
 
-  /// Fetches the hotspots which mach a search term in the [term] parameter.
+  /// Fetches the hotspots which mach a search term in the [query] parameter.
   ///
-  /// The [term] parameter needs to be at least one character, with 3 or more
+  /// The [query] parameter needs to be at least one character, with 3 or more
   /// recommended.
   Future<HeliumResponse<List<HeliumHotspot>>> searchHotspotsForName(
-      String term) async {
-    if (term.isEmpty) {
-      throw ArgumentError.value(term, 'term',
-          'The `term` parameter must be at least one character in length.');
+      String query) async {
+    if (query.isEmpty) {
+      throw ArgumentError.value(query, 'query',
+          'The `query` parameter must be at least one character in length.');
     }
 
     return _client._doRequest(HeliumRequest(
-      path: '/v1/hotspots/name?search=$term',
+      path: '/v1/hotspots/name?search=$query',
       extractResponse: (json) => HeliumRequest.mapDataList(
           json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
     ));
@@ -166,6 +166,39 @@ class HeliumHotspotClient {
       extractResponse: (json) => HeliumRequest.mapDataList(
           json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
     ));
+  }
+
+  /// Lists all blockchain transactions in which the given hotspot was involved.
+  Future<HeliumPagedResponse<List<HeliumTransaction>>> listHotspotActivity(
+      String address,
+      {Set<String> filterTypes = const {}}) async {
+    return _client._doPagedRequest(HeliumPagedRequest(
+      path: (filterTypes.isEmpty)
+          ? '/v1/hotspots/$address/activity'
+          : '/v1/hotspots/$address/activity?filter_types=${filterTypes.join(',')}',
+      extractResponse: (json) => HeliumRequest.mapDataList(
+          json, (hotspot) => HeliumTransaction.fromJson(hotspot)),
+    ));
+  }
+
+  /// Counts transactions that indicate activity for a hotspot.
+  ///
+  /// The results are a map keyed by the transation types given in
+  /// [filterTypes] with the value for each key being the count of transactions
+  /// of that type.
+  Future<HeliumResponse<Map<String, int>>> getHotspotActivityCounts(
+      String address,
+      {Set<String> filterTypes = const {}}) async {
+    return _client._doPagedRequest(
+      HeliumPagedRequest(
+          path: (filterTypes.isEmpty)
+              ? '/v1/hotspots/$address/activity/count'
+              : '/v1/hotspots/$address/activity/count?filter_types=${filterTypes.join(',')}',
+          extractResponse: (json) {
+            final data = json['data'] as Map<String, dynamic>;
+            return data.map((key, value) => MapEntry(key, value as int));
+          }),
+    );
   }
 
   /// Returns rewards for a given hotspot per reward block the hotspot is in,

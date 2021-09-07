@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:json_annotation/json_annotation.dart';
 
 import 'converters.dart';
@@ -59,6 +61,7 @@ class HeliumHotspot {
   /// reported in [speculativeNonce] instead of its own field.
   @JsonKey(name: 'speculative_nonce')
   final num? speculativeNonce;
+
   @JsonKey(
       name: 'timestamp_added',
       fromJson: heliumTimestampFromJson,
@@ -163,4 +166,51 @@ class HeliumGeocode {
   factory HeliumGeocode.fromJson(Map<String, dynamic> json) =>
       _$HeliumGeocodeFromJson(json);
   Map<String, dynamic> toJson() => _$HeliumGeocodeToJson(this);
+}
+
+class HeliumTransaction {
+  final String type;
+  final String hash;
+  final int height;
+  final int time;
+  final Map<String, dynamic> data;
+
+  HeliumTransaction({
+    required this.type,
+    required this.hash,
+    required this.height,
+    required this.time,
+    required this.data,
+  });
+
+  factory HeliumTransaction.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> data = HashMap();
+
+    data.addAll(json);
+
+    final type = data.remove('type');
+    final hash = data.remove('hash');
+    final height = data.remove('height');
+    final time = data.remove('time');
+
+    return HeliumTransaction(
+      type: type,
+      hash: hash,
+      height: height,
+      time: time,
+      data: data,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> json = HashMap();
+
+    json.addAll(data);
+    json['type'] = type;
+    json['hash'] = hash;
+    json['height'] = height;
+    json['time'] = time;
+
+    return json;
+  }
 }

@@ -9,6 +9,10 @@ void main() {
     const CHEESY_BRICK_MUSTANG =
         '112S9jVNn8iRvLpm86DHH2TGczv446YEzmXwNoyxG6xg97wLrda2';
 
+    /// tall-plum-griffin in San Francisco, CA
+    const TALL_PLUM_GRIFFIN =
+        '11cxkqa2PjpJ9YgY9qK3Njn4uSFu6dyK9xV8XE4ahFSqN1YN2db';
+
     /// City ID for Brookline, MA
     const BROOKLINE_MA = 'YnJvb2tsaW5lbWFzc2FjaHVzZXR0c3VuaXRlZCBzdGF0ZXM';
 
@@ -87,6 +91,49 @@ void main() {
           await client.hotspots.searchHotspotsByH3Index('882aa38c2bfffff');
 
       expect(resp.data.map((e) => e.name), contains('zesty-cinnamon-lobster'));
+    });
+
+    test('List activity for a given hotspot', () async {
+      var resp = await client.hotspots.listHotspotActivity(
+        TALL_PLUM_GRIFFIN,
+        filterTypes: {'add_gateway_v1', 'assert_location_v1'},
+      );
+      var transactions = resp.data;
+
+      while (resp.hasNextPage) {
+        resp = await client.getNextPage(resp);
+        transactions.addAll(resp.data);
+      }
+
+      expect(transactions, hasLength(2));
+      expect(transactions[0].type, 'assert_location_v1');
+      expect(transactions[0].height, 395577);
+      expect(transactions[0].data['location'], '8c283082a1a19ff');
+      expect(transactions[1].type, 'add_gateway_v1');
+      expect(transactions[1].height, 395575);
+      expect(transactions[1].data['fee'], 65000);
+      expect(transactions[1].data['staking_fee'], 4000000);
+    });
+
+    test('Get activity counts for a given hotspot', () async {
+      var resp =
+          await client.hotspots.getHotspotActivityCounts(TALL_PLUM_GRIFFIN);
+
+      expect(resp.data['add_gateway_v1'], 1);
+      expect(resp.data['assert_location_v1'], 1);
+      expect(resp.data['rewards_v1'], 1170);
+      expect(resp.data['rewards_v2'], 0);
+    });
+
+    test('Get selected activity counts for a given hotspot', () async {
+      var resp = await client.hotspots.getHotspotActivityCounts(
+          TALL_PLUM_GRIFFIN,
+          filterTypes: {'rewards_v1', 'add_gateway_v1', 'token_burn_v1'});
+
+      expect(resp.data['add_gateway_v1'], 1);
+      expect(resp.data['rewards_v1'], 1170);
+      expect(resp.data['token_burn_v1'], 0);
+      expect(resp.data, hasLength(3));
     });
 
     test('Currently elected hotspots is empty', () async {
