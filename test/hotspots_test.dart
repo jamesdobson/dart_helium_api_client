@@ -64,16 +64,29 @@ void main() {
 
     test('Search for hotspots within a distance of a given lat/lon coordinate',
         () async {
-      final resp1 =
-          await client.hotspots.getHotspotForAddress(CHEESY_BRICK_MUSTANG);
-      final hotspotLat = resp1.data.lat!;
-      final hotspotLon = resp1.data.lng!;
+      // Example from https://docs.helium.com/api/blockchain/hotspots#hotspot-location-distance-search
+      final resp = await client.hotspots.searchHotspotsByDistance(
+          38.12129445739087, -122.52885074963571, 1000);
 
-      final resp2 = await client.hotspots
-          .searchHotspotsByDistance(hotspotLat, hotspotLon, 1000);
+      expect(resp.data.map((e) => e.name),
+          containsAll(['curly-berry-coyote', 'immense-eggplant-stallion']));
+    });
 
-      expect(resp2.data.first.address, CHEESY_BRICK_MUSTANG);
-      expect(resp2.data.length, greaterThan(1));
+    test('Search for hotspots within a given lat/lon box', () async {
+      // Example from https://docs.helium.com/api/blockchain/hotspots#hotspot-location-box-search
+      final resp = await client.hotspots.searchHotspotsByBox(
+          38.0795392, -122.5671627, 38.1588012, -122.5046937);
+
+      expect(resp.data.map((e) => e.name),
+          containsAll(['curly-berry-coyote', 'immense-eggplant-stallion']));
+    });
+
+    test('Search for hotspots within a given h3 index', () async {
+      // Example from https://docs.helium.com/api/blockchain/hotspots#hotspots-for-h3-index
+      final resp =
+          await client.hotspots.searchHotspotsByH3Index('882aa38c2bfffff');
+
+      expect(resp.data.map((e) => e.name), contains('zesty-cinnamon-lobster'));
     });
 
     test('Currently elected hotspots is empty', () async {

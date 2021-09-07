@@ -124,7 +124,7 @@ class HeliumHotspotClient {
     ));
   }
 
-  /// Fetches the hotspots which are withing a given number of metres from the
+  /// Fetches the hotspots which are within a given number of metres from the
   /// given [lat] and [lon] coordinates.
   ///
   /// The [lat] and [lon] coordinates are measured in degrees.
@@ -134,6 +134,35 @@ class HeliumHotspotClient {
     return _client._doPagedRequest(HeliumPagedRequest(
       path:
           '/v1/hotspots/location/distance?lat=$lat&lon=$lon&distance=$distance',
+      extractResponse: (json) => HeliumRequest.mapDataList(
+          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+    ));
+  }
+
+  /// Fetches the hotspots which are within a given geographic boundary
+  /// indicated by its south-western and north-eastern coordinates.
+  ///
+  /// The south-western corner of the box is given by lat/lon pair
+  /// [swlat] and [swlon].
+  /// The north-eastern corner of the box is given by lat/lon pair
+  /// [nelat] and [nelon].
+  Future<HeliumPagedResponse<List<HeliumHotspot>>> searchHotspotsByBox(
+      double swlat, double swlon, double nelat, double nelon) async {
+    return _client._doPagedRequest(HeliumPagedRequest(
+      path:
+          '/v1/hotspots/location/box?swlat=$swlat&swlon=$swlon&nelat=$nelat&nelon=$nelon',
+      extractResponse: (json) => HeliumRequest.mapDataList(
+          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+    ));
+  }
+
+  /// Fetches the hotspots which are in the given h3 index.
+  ///
+  /// The supported h3 indices are currently limited to resolution 8.
+  Future<HeliumPagedResponse<List<HeliumHotspot>>> searchHotspotsByH3Index(
+      String h3index) async {
+    return _client._doPagedRequest(HeliumPagedRequest(
+      path: '/v1/hotspots/hex/$h3index',
       extractResponse: (json) => HeliumRequest.mapDataList(
           json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
     ));
