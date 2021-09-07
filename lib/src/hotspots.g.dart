@@ -50,8 +50,8 @@ HeliumHotspot _$HeliumHotspotFromJson(Map<String, dynamic> json) =>
           HeliumHotspotStatus.fromJson(json['status'] as Map<String, dynamic>),
       lastPoCChallenge: json['last_poc_challenge'] as int?,
       lastChangeBlock: json['last_change_block'] as int,
-      gain: (json['gain'] as num).toDouble(),
-      elevation: (json['elevation'] as num).toDouble(),
+      gain: json['gain'] as int,
+      elevation: json['elevation'] as int,
     );
 
 Map<String, dynamic> _$HeliumHotspotToJson(HeliumHotspot instance) =>

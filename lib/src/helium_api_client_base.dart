@@ -1,4 +1,5 @@
 import 'hotspots.dart';
+import 'transactions.dart';
 import 'request.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -12,10 +13,14 @@ class HeliumClient {
   /// Operations on the Hotspots API. (https://docs.helium.com/api/blockchain/hotspots)
   late final HeliumHotspotClient hotspots;
 
+  /// Operations on the Transactions API. (https://docs.helium.com/api/blockchain/transactions)
+  late final HeliumTransactionsClient transactions;
+
   HeliumClient({
     baseUrl = STABLE_URL,
   }) : _base = Uri.parse(baseUrl) {
     hotspots = HeliumHotspotClient(this);
+    transactions = HeliumTransactionsClient(this);
   }
 
   Future<HeliumResponse<T>> _doRequest<T>(final HeliumRequest<T> req) async {
@@ -53,10 +58,42 @@ class HeliumClient {
   }
 
   /*
-  Future<HeliumPagedResponse<List<D>>> readAllPages<D>(final HeliumPagedResponse<List<D> response) async {
+  Future<List<D>> readAll<D>(final HeliumPagedResponse<List<D>> response) async {
 
   };
   */
+}
+
+class HeliumResponse<T> {
+  final T data;
+
+  HeliumResponse({
+    required this.data,
+  });
+}
+
+class HeliumPagedResponse<T> extends HeliumResponse<T> {
+  final HeliumPagedRequest<T> _request;
+  final String? _cursor;
+
+  HeliumPagedResponse(
+      {required data, required HeliumPagedRequest<T> request, String? cursor})
+      : _request = request,
+        _cursor = cursor,
+        super(data: data);
+
+  bool get hasNextPage => _cursor != null;
+
+  HeliumPagedRequest<T> _getNextPageRequest() {
+    final c = _cursor;
+
+    if (c == null) {
+      throw StateError(
+          '`getNextPageRequest` must not be called when `hasNextPage` is false.');
+    }
+
+    return _request.withCursor(c);
+  }
 }
 
 /// Operations on the Hotspots API.
@@ -169,13 +206,17 @@ class HeliumHotspotClient {
   }
 
   /// Lists all blockchain transactions in which the given hotspot was involved.
+  ///
+  /// [address] is the B58 address of the hotspot.
+  /// [filterTypes] is a list of transaction types to retrieve. If empty, all
+  /// transactions are listed.
   Future<HeliumPagedResponse<List<HeliumTransaction>>> listHotspotActivity(
       String address,
-      {Set<String> filterTypes = const {}}) async {
+      {Set<HeliumTransactionType> filterTypes = const {}}) async {
     return _client._doPagedRequest(HeliumPagedRequest(
       path: (filterTypes.isEmpty)
           ? '/v1/hotspots/$address/activity'
-          : '/v1/hotspots/$address/activity?filter_types=${filterTypes.join(',')}',
+          : '/v1/hotspots/$address/activity?filter_types=${filterTypes.map((e) => e.value).join(',')}',
       extractResponse: (json) => HeliumRequest.mapDataList(
           json, (hotspot) => HeliumTransaction.fromJson(hotspot)),
     ));
@@ -185,20 +226,35 @@ class HeliumHotspotClient {
   ///
   /// The results are a map keyed by the transation types given in
   /// [filterTypes] with the value for each key being the count of transactions
-  /// of that type.
-  Future<HeliumResponse<Map<String, int>>> getHotspotActivityCounts(
-      String address,
-      {Set<String> filterTypes = const {}}) async {
+  /// of that type. If [filterTypes] is omitted, all types are reported,
+  /// including ones with a count of zero.
+  ///
+  /// [address] is the B58 address of the hotspot.
+  Future<HeliumResponse<Map<HeliumTransactionType, int>>>
+      getHotspotActivityCounts(String address,
+          {Set<HeliumTransactionType> filterTypes = const {}}) async {
     return _client._doPagedRequest(
       HeliumPagedRequest(
           path: (filterTypes.isEmpty)
               ? '/v1/hotspots/$address/activity/count'
-              : '/v1/hotspots/$address/activity/count?filter_types=${filterTypes.join(',')}',
+              : '/v1/hotspots/$address/activity/count?filter_types=${filterTypes.map((e) => e.value).join(',')}',
           extractResponse: (json) {
             final data = json['data'] as Map<String, dynamic>;
-            return data.map((key, value) => MapEntry(key, value as int));
+            return data.map((key, value) =>
+                MapEntry(HeliumTransactionType.get(key), value as int));
           }),
     );
+  }
+
+  /// Returns the list of hotspots that are currently elected to the concensus
+  /// group.
+  Future<HeliumResponse<List<HeliumHotspot>>>
+      getCurrentlyElectedHotspots() async {
+    return _client._doRequest(HeliumRequest(
+      path: '/v1/hotspots/elected',
+      extractResponse: (json) => HeliumRequest.mapDataList(
+          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+    ));
   }
 
   /// Returns rewards for a given hotspot per reward block the hotspot is in,
@@ -216,15 +272,20 @@ class HeliumHotspotClient {
           json, (reward) => HeliumHotspotReward.fromJson(reward)),
     ));
   }
+}
 
-  /// Returns the list of hotspots that are currently elected to the concensus
-  /// group.
-  Future<HeliumResponse<List<HeliumHotspot>>>
-      getCurrentlyElectedHotspots() async {
+/// Operations on the Transactions API.
+/// https://docs.helium.com/api/blockchain/transactions
+class HeliumTransactionsClient {
+  final HeliumClient _client;
+
+  HeliumTransactionsClient(this._client);
+
+  /// Fetches the transaction for a given hash.
+  Future<HeliumResponse<HeliumTransaction>> getTransaction(String hash) async {
     return _client._doRequest(HeliumRequest(
-      path: '/v1/hotspots/elected',
-      extractResponse: (json) => HeliumRequest.mapDataList(
-          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+      path: '/v1/transactions/$hash',
+      extractResponse: (json) => HeliumTransaction.fromJson(json['data']),
     ));
   }
 }
@@ -236,36 +297,4 @@ class HeliumException implements Exception {
 
   @override
   String toString() => message;
-}
-
-class HeliumResponse<T> {
-  final T data;
-
-  HeliumResponse({
-    required this.data,
-  });
-}
-
-class HeliumPagedResponse<T> extends HeliumResponse<T> {
-  final HeliumPagedRequest<T> _request;
-  final String? _cursor;
-
-  HeliumPagedResponse(
-      {required data, required HeliumPagedRequest<T> request, String? cursor})
-      : _request = request,
-        _cursor = cursor,
-        super(data: data);
-
-  bool get hasNextPage => _cursor != null;
-
-  HeliumPagedRequest<T> _getNextPageRequest() {
-    final c = _cursor;
-
-    if (c == null) {
-      throw StateError(
-          '`getNextPageRequest` must not be called when `hasNextPage` is false.');
-    }
-
-    return _request.withCursor(c);
-  }
 }

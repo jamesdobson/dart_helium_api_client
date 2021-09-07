@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:json_annotation/json_annotation.dart';
 
 import 'converters.dart';
@@ -38,6 +36,7 @@ class HeliumHotspotReward {
 
   factory HeliumHotspotReward.fromJson(Map<String, dynamic> json) =>
       _$HeliumHotspotRewardFromJson(json);
+
   Map<String, dynamic> toJson() => _$HeliumHotspotRewardToJson(this);
 }
 
@@ -77,9 +76,12 @@ class HeliumHotspot {
   final int? lastPoCChallenge;
   @JsonKey(name: 'last_change_block')
   final int lastChangeBlock;
-  final double
-      gain; // TODO: add a custom deserializer to convert from tenths of dBi to dBi
-  final double elevation;
+
+  /// The antenna gain in tenths of a dBi.
+  final int gain;
+
+  /// The antenna elevation above ground level in metres.
+  final int elevation;
 
   HeliumHotspot({
     required this.address,
@@ -107,6 +109,7 @@ class HeliumHotspot {
 
   factory HeliumHotspot.fromJson(Map<String, dynamic> json) =>
       _$HeliumHotspotFromJson(json);
+
   Map<String, dynamic> toJson() => _$HeliumHotspotToJson(this);
 }
 
@@ -127,6 +130,7 @@ class HeliumHotspotStatus {
 
   factory HeliumHotspotStatus.fromJson(Map<String, dynamic> json) =>
       _$HeliumHotspotStatusFromJson(json);
+
   Map<String, dynamic> toJson() => _$HeliumHotspotStatusToJson(this);
 }
 
@@ -165,52 +169,6 @@ class HeliumGeocode {
 
   factory HeliumGeocode.fromJson(Map<String, dynamic> json) =>
       _$HeliumGeocodeFromJson(json);
+
   Map<String, dynamic> toJson() => _$HeliumGeocodeToJson(this);
-}
-
-class HeliumTransaction {
-  final String type;
-  final String hash;
-  final int height;
-  final int time;
-  final Map<String, dynamic> data;
-
-  HeliumTransaction({
-    required this.type,
-    required this.hash,
-    required this.height,
-    required this.time,
-    required this.data,
-  });
-
-  factory HeliumTransaction.fromJson(Map<String, dynamic> json) {
-    Map<String, dynamic> data = HashMap();
-
-    data.addAll(json);
-
-    final type = data.remove('type');
-    final hash = data.remove('hash');
-    final height = data.remove('height');
-    final time = data.remove('time');
-
-    return HeliumTransaction(
-      type: type,
-      hash: hash,
-      height: height,
-      time: time,
-      data: data,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = HashMap();
-
-    json.addAll(data);
-    json['type'] = type;
-    json['hash'] = hash;
-    json['height'] = height;
-    json['time'] = time;
-
-    return json;
-  }
 }

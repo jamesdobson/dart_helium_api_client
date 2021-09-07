@@ -2,7 +2,7 @@ import 'package:helium_api_client/helium_api_client.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Hotspot API Integration Tests', () {
+  group('Hotspots API Integration Tests', () {
     final client = HeliumClient();
 
     /// cheesy-brick-mustang in Brookline, MA
@@ -96,7 +96,10 @@ void main() {
     test('List activity for a given hotspot', () async {
       var resp = await client.hotspots.listHotspotActivity(
         TALL_PLUM_GRIFFIN,
-        filterTypes: {'add_gateway_v1', 'assert_location_v1'},
+        filterTypes: {
+          HeliumTransactionType.ADD_GATEWAY_V1,
+          HeliumTransactionType.ASSERT_LOCATION_V1
+        },
       );
       var transactions = resp.data;
 
@@ -106,33 +109,39 @@ void main() {
       }
 
       expect(transactions, hasLength(2));
-      expect(transactions[0].type, 'assert_location_v1');
-      expect(transactions[0].height, 395577);
-      expect(transactions[0].data['location'], '8c283082a1a19ff');
-      expect(transactions[1].type, 'add_gateway_v1');
-      expect(transactions[1].height, 395575);
-      expect(transactions[1].data['fee'], 65000);
-      expect(transactions[1].data['staking_fee'], 4000000);
+      var txn0 = transactions[0] as HeliumTransactionAssertLocationV1;
+      var txn1 = transactions[1] as HeliumTransactionAddGatewayV1;
+      expect(txn0.type, HeliumTransactionType.ASSERT_LOCATION_V1);
+      expect(txn0.height, 395577);
+      expect(txn0.location, '8c283082a1a19ff');
+      expect(txn1.type, HeliumTransactionType.ADD_GATEWAY_V1);
+      expect(txn1.height, 395575);
+      expect(txn1.fee, 65000);
+      expect(txn1.stakingFee, 4000000);
+      print(txn1.hash);
     });
 
     test('Get activity counts for a given hotspot', () async {
       var resp =
           await client.hotspots.getHotspotActivityCounts(TALL_PLUM_GRIFFIN);
 
-      expect(resp.data['add_gateway_v1'], 1);
-      expect(resp.data['assert_location_v1'], 1);
-      expect(resp.data['rewards_v1'], 1170);
-      expect(resp.data['rewards_v2'], 0);
+      expect(resp.data[HeliumTransactionType.ADD_GATEWAY_V1], 1);
+      expect(resp.data[HeliumTransactionType.ASSERT_LOCATION_V1], 1);
+      expect(resp.data[HeliumTransactionType.REWARDS_V1], 1170);
+      expect(resp.data[HeliumTransactionType.REWARDS_V2], 0);
     });
 
     test('Get selected activity counts for a given hotspot', () async {
-      var resp = await client.hotspots.getHotspotActivityCounts(
-          TALL_PLUM_GRIFFIN,
-          filterTypes: {'rewards_v1', 'add_gateway_v1', 'token_burn_v1'});
+      var resp = await client.hotspots
+          .getHotspotActivityCounts(TALL_PLUM_GRIFFIN, filterTypes: {
+        HeliumTransactionType.REWARDS_V1,
+        HeliumTransactionType.ADD_GATEWAY_V1,
+        HeliumTransactionType.TOKEN_BURN_V1
+      });
 
-      expect(resp.data['add_gateway_v1'], 1);
-      expect(resp.data['rewards_v1'], 1170);
-      expect(resp.data['token_burn_v1'], 0);
+      expect(resp.data[HeliumTransactionType.ADD_GATEWAY_V1], 1);
+      expect(resp.data[HeliumTransactionType.REWARDS_V1], 1170);
+      expect(resp.data[HeliumTransactionType.TOKEN_BURN_V1], 0);
       expect(resp.data, hasLength(3));
     });
 
