@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'converters.dart';
+import 'shared.dart';
 
 part 'hotspots.g.dart';
 
@@ -17,37 +18,20 @@ class HeliumHotspotFilterMode {
 }
 
 @JsonSerializable()
-class HeliumHotspotReward {
-  final String account;
-  final int amount;
-  final int block;
-  final String gateway;
-  final String hash;
-  final String timestamp;
-
-  HeliumHotspotReward({
-    required this.account,
-    required this.amount,
-    required this.block,
-    required this.gateway,
-    required this.hash,
-    required this.timestamp,
-  });
-
-  factory HeliumHotspotReward.fromJson(Map<String, dynamic> json) =>
-      _$HeliumHotspotRewardFromJson(json);
-
-  Map<String, dynamic> toJson() => _$HeliumHotspotRewardToJson(this);
-}
-
-@JsonSerializable()
 class HeliumHotspot {
+  /// The B58 address of the hotspot.
   final String address;
   final int block;
   @JsonKey(name: 'block_added')
   final int blockAdded;
   final HeliumGeocode geocode;
+
+  /// The latitude of this hotspot, in degrees.
+  /// This is the value from the most recent location assertion transaction.
   final double? lat;
+
+  /// The longitude of this hotspot, in degrees.
+  /// This is the value from the most recent location assertion transaction.
   final double? lng;
   final String? location;
   @JsonKey(name: 'location_hex')
@@ -62,9 +46,10 @@ class HeliumHotspot {
   final num? speculativeNonce;
 
   @JsonKey(
-      name: 'timestamp_added',
-      fromJson: heliumTimestampFromJson,
-      toJson: heliumTimestampToJson)
+    name: 'timestamp_added',
+    fromJson: heliumTimestampFromJson,
+    toJson: heliumTimestampToJson,
+  )
   final DateTime timestampAdded;
   @JsonKey(name: 'reward_scale')
   final double? rewardScale;
@@ -78,9 +63,11 @@ class HeliumHotspot {
   final int lastChangeBlock;
 
   /// The antenna gain in tenths of a dBi.
+  /// This is the value from the most recent location assertion transaction.
   final int gain;
 
   /// The antenna elevation above ground level in metres.
+  /// This is the value from the most recent location assertion transaction.
   final int elevation;
 
   HeliumHotspot({
@@ -135,40 +122,55 @@ class HeliumHotspotStatus {
 }
 
 @JsonSerializable()
-class HeliumGeocode {
-  @JsonKey(name: 'long_city')
-  final String? longCity;
-  @JsonKey(name: 'long_country')
-  final String? longCountry;
-  @JsonKey(name: 'long_state')
-  final String? longState;
-  @JsonKey(name: 'long_street')
-  final String? longStreet;
-  @JsonKey(name: 'short_city')
-  final String? shortCity;
-  @JsonKey(name: 'short_country')
-  final String? shortCountry;
-  @JsonKey(name: 'short_state')
-  final String? shortState;
-  @JsonKey(name: 'short_street')
-  final String? shortStreet;
-  @JsonKey(name: 'city_id')
-  final String? cityId;
+class HeliumHotspotReward {
+  /// The address of the account to which the reward was paid.
+  final String account;
 
-  HeliumGeocode({
-    this.longCity,
-    this.longCountry,
-    this.longState,
-    this.longStreet,
-    this.shortCity,
-    this.shortCountry,
-    this.shortState,
-    this.shortStreet,
-    this.cityId,
+  /// The B58 address of the hotspot that earned the reward.
+  final String gateway;
+
+  /// The amount of rewards earned, in bones (1 HNT == 100 000 000 bones)
+  final int amount;
+
+  /// The block of the transaction containing this reward.
+  final int block;
+
+  /// The hash of the mining rewards transaction containing this reward.
+  final String hash;
+
+  /// The timestamp of the block containing the rewards transaction.
+  @JsonKey(
+    fromJson: heliumTimestampFromJson,
+    toJson: heliumTimestampToJson,
+  )
+  final DateTime timestamp;
+
+  HeliumHotspotReward({
+    required this.account,
+    required this.gateway,
+    required this.amount,
+    required this.block,
+    required this.hash,
+    required this.timestamp,
   });
 
-  factory HeliumGeocode.fromJson(Map<String, dynamic> json) =>
-      _$HeliumGeocodeFromJson(json);
+  factory HeliumHotspotReward.fromJson(Map<String, dynamic> json) =>
+      _$HeliumHotspotRewardFromJson(json);
 
-  Map<String, dynamic> toJson() => _$HeliumGeocodeToJson(this);
+  Map<String, dynamic> toJson() => _$HeliumHotspotRewardToJson(this);
+}
+
+@JsonSerializable()
+class HeliumHotspotRewardTotal {
+  /// The sum of rewards earned, in bones (1 HNT == 100 000 000 bones)
+  final int sum;
+
+  HeliumHotspotRewardTotal({
+    required this.sum,
+  });
+
+  factory HeliumHotspotRewardTotal.fromJson(Map<String, dynamic> json) =>
+      _$HeliumHotspotRewardTotalFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HeliumHotspotRewardTotalToJson(this);
 }

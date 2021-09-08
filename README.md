@@ -36,7 +36,6 @@ Please file feature requests and bugs at the [issue tracker][tracker].
 
 ## TODO
 
-* Implement remainder of hotspots API
 * Document the hotspots model
 * Implement the Oracle Prices API
 * Add exceptions for 4xx, 5xx, etc.

@@ -2,6 +2,9 @@ import 'dart:collection';
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'converters.dart';
+import 'shared.dart';
+
 part 'transactions.g.dart';
 
 abstract class HeliumTransaction {
@@ -18,8 +21,9 @@ abstract class HeliumTransaction {
   /// The block containing the transaction.
   final int height;
 
-  /// TODO: Add description.
-  final int time;
+  /// The transaction time.
+  @JsonKey(fromJson: heliumBlockTimeFromJson, toJson: heliumBlockTimeToJson)
+  final DateTime time;
 
   HeliumTransaction({
     required this.type,
@@ -35,6 +39,10 @@ abstract class HeliumTransaction {
         HeliumTransactionAssertLocationV1.fromJson(json),
     HeliumTransactionType.ASSERT_LOCATION_V2: (json) =>
         HeliumTransactionAssertLocationV2.fromJson(json),
+    HeliumTransactionType.CONSENSUS_GROUP_V1: (json) =>
+        HeliumTransactionConsensusGroupV1.fromJson(json),
+    HeliumTransactionType.POC_RECEIPTS_V1: (json) =>
+        HeliumTransactionPoCReceiptsV1.fromJson(json),
   };
 
   factory HeliumTransaction.fromJson(Map<String, dynamic> json) {
@@ -76,17 +84,23 @@ class HeliumTransactionType {
       HeliumTransactionType._internal('assert_location_v1');
   static const ASSERT_LOCATION_V2 =
       HeliumTransactionType._internal('assert_location_v2');
+  static const CONSENSUS_GROUP_V1 =
+      HeliumTransactionType._internal('consensus_group_v1');
+  static const POC_RECEIPTS_V1 =
+      HeliumTransactionType._internal('poc_receipts_v1');
   static const REWARDS_V1 = HeliumTransactionType._internal('rewards_v1');
   static const REWARDS_V2 = HeliumTransactionType._internal('rewards_v2');
   static const TOKEN_BURN_V1 = HeliumTransactionType._internal('token_burn_v1');
 
   static final Map<String, HeliumTransactionType> _lookup = {
-    'add_gateway_v1': ADD_GATEWAY_V1,
-    'assert_location_v1': ASSERT_LOCATION_V1,
-    'assert_location_v2': ASSERT_LOCATION_V2,
-    'rewards_v1': REWARDS_V1,
-    'rewards_v2': REWARDS_V2,
-    'token_burn_v1': TOKEN_BURN_V1,
+    ADD_GATEWAY_V1.value: ADD_GATEWAY_V1,
+    ASSERT_LOCATION_V1.value: ASSERT_LOCATION_V1,
+    ASSERT_LOCATION_V2.value: ASSERT_LOCATION_V2,
+    CONSENSUS_GROUP_V1.value: CONSENSUS_GROUP_V1,
+    POC_RECEIPTS_V1.value: POC_RECEIPTS_V1,
+    REWARDS_V1.value: REWARDS_V1,
+    REWARDS_V2.value: REWARDS_V2,
+    TOKEN_BURN_V1.value: TOKEN_BURN_V1,
   };
 }
 
@@ -106,7 +120,7 @@ class HeliumTransactionUnknown extends HeliumTransaction {
     required HeliumTransactionType type,
     required String hash,
     required int height,
-    required int time,
+    required DateTime time,
     required this.data,
   }) : super(type: type, hash: hash, height: height, time: time);
 
@@ -118,7 +132,7 @@ class HeliumTransactionUnknown extends HeliumTransaction {
     final type = heliumTransactionTypeFromJson(data.remove('type'));
     final hash = data.remove('hash');
     final height = data.remove('height');
-    final time = data.remove('time');
+    final time = heliumBlockTimeFromJson(data.remove('time'));
 
     return HeliumTransactionUnknown(
       type: type,
@@ -170,7 +184,7 @@ class HeliumTransactionAddGatewayV1 extends HeliumTransaction {
     required HeliumTransactionType type,
     required String hash,
     required int height,
-    required int time,
+    required DateTime time,
     required this.fee,
     required this.stakingFee,
     required this.gateway,
@@ -223,7 +237,7 @@ class HeliumTransactionAssertLocationV1 extends HeliumTransaction {
     required HeliumTransactionType type,
     required String hash,
     required int height,
-    required int time,
+    required DateTime time,
     required this.fee,
     required this.stakingFee,
     required this.gateway,
@@ -288,7 +302,7 @@ class HeliumTransactionAssertLocationV2 extends HeliumTransaction {
     required HeliumTransactionType type,
     required String hash,
     required int height,
-    required int time,
+    required DateTime time,
     required this.fee,
     required this.stakingFee,
     required this.gateway,
@@ -309,4 +323,171 @@ class HeliumTransactionAssertLocationV2 extends HeliumTransaction {
   @override
   Map<String, dynamic> toJson() =>
       _$HeliumTransactionAssertLocationV2ToJson(this);
+}
+
+@JsonSerializable()
+class HeliumTransactionConsensusGroupV1 extends HeliumTransaction {
+  final List<String> members;
+  final int delay;
+  final String proof;
+
+  HeliumTransactionConsensusGroupV1({
+    required HeliumTransactionType type,
+    required String hash,
+    required int height,
+    required DateTime time,
+    required this.members,
+    required this.delay,
+    required this.proof,
+  }) : super(type: type, hash: hash, height: height, time: time);
+
+  factory HeliumTransactionConsensusGroupV1.fromJson(
+          Map<String, dynamic> json) =>
+      _$HeliumTransactionConsensusGroupV1FromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() =>
+      _$HeliumTransactionConsensusGroupV1ToJson(this);
+}
+
+@JsonSerializable()
+class HeliumTransactionPoCReceiptsV1 extends HeliumTransaction {
+  final String challenger;
+  @JsonKey(name: 'challenger_owner')
+  final String challengerOwner;
+  @JsonKey(name: 'challenger_location')
+  final String challengerLocation;
+  @JsonKey(name: 'challenger_lat')
+  final double challengerLat;
+  @JsonKey(name: 'challenger_lon')
+  final double challengerLon;
+  final List<HeliumPoCReceiptsPathElement> path;
+  final String secret;
+  @JsonKey(name: 'onion_key_hash')
+  final String onionKeyHash;
+  @JsonKey(name: 'request_block_hash')
+  final String? requestBlockHash;
+  final int fee;
+
+  HeliumTransactionPoCReceiptsV1({
+    required HeliumTransactionType type,
+    required String hash,
+    required int height,
+    required DateTime time,
+    required this.challenger,
+    required this.challengerOwner,
+    required this.challengerLocation,
+    required this.challengerLat,
+    required this.challengerLon,
+    required this.path,
+    required this.secret,
+    required this.onionKeyHash,
+    this.requestBlockHash,
+    required this.fee,
+  }) : super(type: type, hash: hash, height: height, time: time);
+
+  factory HeliumTransactionPoCReceiptsV1.fromJson(Map<String, dynamic> json) =>
+      _$HeliumTransactionPoCReceiptsV1FromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$HeliumTransactionPoCReceiptsV1ToJson(this);
+}
+
+@JsonSerializable()
+class HeliumPoCReceiptsPathElement {
+  final List<HeliumPoCReceiptsWitness> witnesses;
+  final HeliumPoCReceiptsReceipt? receipt;
+  final HeliumGeocode? geocode;
+  final String challengee;
+  @JsonKey(name: 'challengee_owner')
+  final String challengeeOwner;
+  @JsonKey(name: 'challengee_location')
+  final String challengeeLocation;
+  @JsonKey(name: 'challengee_location_hex')
+  final String challengeeLocationHex;
+  @JsonKey(name: 'challengee_lat')
+  final double challengeeLat;
+  @JsonKey(name: 'challengee_lon')
+  final double challengeeLon;
+
+  HeliumPoCReceiptsPathElement({
+    required this.witnesses,
+    this.receipt,
+    this.geocode,
+    required this.challengee,
+    required this.challengeeOwner,
+    required this.challengeeLocation,
+    required this.challengeeLocationHex,
+    required this.challengeeLat,
+    required this.challengeeLon,
+  });
+
+  factory HeliumPoCReceiptsPathElement.fromJson(Map<String, dynamic> json) =>
+      _$HeliumPoCReceiptsPathElementFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HeliumPoCReceiptsPathElementToJson(this);
+}
+
+@JsonSerializable()
+class HeliumPoCReceiptsWitness {
+  final int timestamp;
+  final String gateway;
+  final String owner;
+  final int signal;
+  final double? snr;
+  final String location;
+  @JsonKey(name: 'location_hex')
+  final String locationHex;
+  @JsonKey(name: 'packet_hash')
+  final String packetHash;
+  @JsonKey(name: 'is_valid')
+  final bool? isValid;
+  @JsonKey(name: 'invalid_reason')
+  final String? invalidReason;
+  final double? frequency;
+  final String? datarate;
+  final int? channel;
+
+  HeliumPoCReceiptsWitness({
+    required this.timestamp,
+    required this.gateway,
+    required this.owner,
+    required this.signal,
+    this.snr,
+    required this.location,
+    required this.locationHex,
+    required this.packetHash,
+    this.isValid,
+    this.invalidReason,
+    this.frequency,
+    this.datarate,
+    this.channel,
+  });
+
+  factory HeliumPoCReceiptsWitness.fromJson(Map<String, dynamic> json) =>
+      _$HeliumPoCReceiptsWitnessFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HeliumPoCReceiptsWitnessToJson(this);
+}
+
+@JsonSerializable()
+class HeliumPoCReceiptsReceipt {
+  final int timestamp;
+  final String gateway;
+  final int signal;
+  final String origin;
+  final String data;
+
+  HeliumPoCReceiptsReceipt({
+    required this.timestamp,
+    required this.gateway,
+    required this.signal,
+    required this.origin,
+    required this.data,
+  });
+
+  factory HeliumPoCReceiptsReceipt.fromJson(Map<String, dynamic> json) =>
+      _$HeliumPoCReceiptsReceiptFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HeliumPoCReceiptsReceiptToJson(this);
 }

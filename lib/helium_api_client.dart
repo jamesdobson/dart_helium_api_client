@@ -9,5 +9,3 @@ export 'src/request.dart';
 
 export 'src/hotspots.dart';
 export 'src/transactions.dart';
-
-// TODO: Export any libraries intended for clients of this package.

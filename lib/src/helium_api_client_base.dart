@@ -30,7 +30,7 @@ class HeliumClient {
 
     if (result.containsKey('cursor')) {
       throw StateError(
-          '`_doRequest` received a paged response, use `_doPagedRequest` instead.');
+          '`_doRequest` received a paged response, use `_doPagedRequest` instead. (uri=$uri)');
     }
 
     return HeliumResponse<T>(
@@ -65,6 +65,7 @@ class HeliumClient {
 }
 
 class HeliumResponse<T> {
+  /// The response data.
   final T data;
 
   HeliumResponse({
@@ -113,8 +114,8 @@ class HeliumHotspotClient {
       path: (filterModes.isNotEmpty)
           ? '/v1/hotspots?filter_modes=${filterModes.map((e) => e.value).join(',')}'
           : '/v1/hotspots',
-      extractResponse: (json) => HeliumRequest.mapDataList(
-          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+      extractResponse: (json) =>
+          HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
     ));
   }
 
@@ -138,8 +139,8 @@ class HeliumHotspotClient {
       String name) async {
     return _client._doRequest(HeliumRequest(
       path: '/v1/hotspots/name/$name',
-      extractResponse: (json) => HeliumRequest.mapDataList(
-          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+      extractResponse: (json) =>
+          HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
     ));
   }
 
@@ -156,8 +157,8 @@ class HeliumHotspotClient {
 
     return _client._doRequest(HeliumRequest(
       path: '/v1/hotspots/name?search=$query',
-      extractResponse: (json) => HeliumRequest.mapDataList(
-          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+      extractResponse: (json) =>
+          HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
     ));
   }
 
@@ -171,8 +172,8 @@ class HeliumHotspotClient {
     return _client._doPagedRequest(HeliumPagedRequest(
       path:
           '/v1/hotspots/location/distance?lat=$lat&lon=$lon&distance=$distance',
-      extractResponse: (json) => HeliumRequest.mapDataList(
-          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+      extractResponse: (json) =>
+          HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
     ));
   }
 
@@ -188,20 +189,20 @@ class HeliumHotspotClient {
     return _client._doPagedRequest(HeliumPagedRequest(
       path:
           '/v1/hotspots/location/box?swlat=$swlat&swlon=$swlon&nelat=$nelat&nelon=$nelon',
-      extractResponse: (json) => HeliumRequest.mapDataList(
-          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+      extractResponse: (json) =>
+          HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
     ));
   }
 
-  /// Fetches the hotspots which are in the given h3 index.
+  /// Fetches the hotspots which are in the given H3 index.
   ///
-  /// The supported h3 indices are currently limited to resolution 8.
+  /// The supported H3 indices are currently limited to resolution 8.
   Future<HeliumPagedResponse<List<HeliumHotspot>>> searchHotspotsByH3Index(
       String h3index) async {
     return _client._doPagedRequest(HeliumPagedRequest(
       path: '/v1/hotspots/hex/$h3index',
-      extractResponse: (json) => HeliumRequest.mapDataList(
-          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+      extractResponse: (json) =>
+          HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
     ));
   }
 
@@ -217,8 +218,8 @@ class HeliumHotspotClient {
       path: (filterTypes.isEmpty)
           ? '/v1/hotspots/$address/activity'
           : '/v1/hotspots/$address/activity?filter_types=${filterTypes.map((e) => e.value).join(',')}',
-      extractResponse: (json) => HeliumRequest.mapDataList(
-          json, (hotspot) => HeliumTransaction.fromJson(hotspot)),
+      extractResponse: (json) =>
+          HeliumRequest.mapDataList(json, (h) => HeliumTransaction.fromJson(h)),
     ));
   }
 
@@ -246,14 +247,40 @@ class HeliumHotspotClient {
     );
   }
 
+  /// Lists the consensus group transactions in which the given hotspot was
+  /// involved.
+  ///
+  /// [address] is the B58 address of the hotspot.
+  Future<HeliumPagedResponse<List<HeliumTransactionConsensusGroupV1>>>
+      listHotspotElections(String address) async {
+    return _client._doPagedRequest(HeliumPagedRequest(
+      path: '/v1/hotspots/$address/elections',
+      extractResponse: (json) => HeliumRequest.mapDataList(
+          json, (t) => HeliumTransactionConsensusGroupV1.fromJson(t)),
+    ));
+  }
+
   /// Returns the list of hotspots that are currently elected to the concensus
   /// group.
   Future<HeliumResponse<List<HeliumHotspot>>>
       getCurrentlyElectedHotspots() async {
     return _client._doRequest(HeliumRequest(
       path: '/v1/hotspots/elected',
+      extractResponse: (json) =>
+          HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
+    ));
+  }
+
+  /// Lists the challenge (receipts) in which the given hotspot is a
+  /// challenger, challengee, or witness.
+  ///
+  /// [address] is the B58 address of the hotspot.
+  Future<HeliumPagedResponse<List<HeliumTransactionPoCReceiptsV1>>>
+      listHotspotChallenges(String address) async {
+    return _client._doPagedRequest(HeliumPagedRequest(
+      path: '/v1/hotspots/$address/challenges',
       extractResponse: (json) => HeliumRequest.mapDataList(
-          json, (hotspot) => HeliumHotspot.fromJson(hotspot)),
+          json, (t) => HeliumTransactionPoCReceiptsV1.fromJson(t)),
     ));
   }
 
@@ -269,7 +296,47 @@ class HeliumHotspotClient {
       path:
           '/v1/hotspots/$address/rewards?min_time=${minTime.toUtc().toIso8601String()}&max_time=${maxTime.toUtc().toIso8601String()}',
       extractResponse: (json) => HeliumRequest.mapDataList(
-          json, (reward) => HeliumHotspotReward.fromJson(reward)),
+          json, (r) => HeliumHotspotReward.fromJson(r)),
+    ));
+  }
+
+  /// Returns the total rewards earned for a given hotspot over a given time
+  /// range.
+  ///
+  /// The block that contains the [maxTime] timestamp is excluded from the
+  /// result.
+  /// [address] is the B58 address of the hotspot.
+  Future<HeliumResponse<HeliumHotspotRewardTotal>> getRewardTotal(
+      String address, DateTime minTime, DateTime maxTime) async {
+    return _client._doRequest(HeliumRequest(
+      path:
+          '/v1/hotspots/$address/rewards/sum?min_time=${minTime.toUtc().toIso8601String()}&max_time=${maxTime.toUtc().toIso8601String()}',
+      extractResponse: (json) =>
+          HeliumHotspotRewardTotal.fromJson(json['data']),
+    ));
+  }
+
+  /// Retrieves the list of witnesses for a given hotspot over about the last
+  /// 5 days of blocks.
+  ///
+  /// [address] is the B58 address of the hotspot.
+  Future<HeliumResponse<List<HeliumHotspot>>> getWitnesses(String address) {
+    return _client._doRequest(HeliumRequest(
+      path: '/v1/hotspots/$address/witnesses',
+      extractResponse: (json) =>
+          HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
+    ));
+  }
+
+  /// Retrieves the list of hotspots the given hotspot witnessed over about the
+  /// last 5 days of blocks.
+  ///
+  /// [address] is the B58 address of the hotspot.
+  Future<HeliumResponse<List<HeliumHotspot>>> getWitnessed(String address) {
+    return _client._doRequest(HeliumRequest(
+      path: '/v1/hotspots/$address/witnessed',
+      extractResponse: (json) =>
+          HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
     ));
   }
 }

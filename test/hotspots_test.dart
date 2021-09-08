@@ -118,7 +118,6 @@ void main() {
       expect(txn1.height, 395575);
       expect(txn1.fee, 65000);
       expect(txn1.stakingFee, 4000000);
-      print(txn1.hash);
     });
 
     test('Get activity counts for a given hotspot', () async {
@@ -145,17 +144,68 @@ void main() {
       expect(resp.data, hasLength(3));
     });
 
+    test('List hotspot elections for a given hotspot', () async {
+      var resp = await client.hotspots.listHotspotElections(TALL_PLUM_GRIFFIN);
+      var transactions = resp.data;
+
+      while (resp.hasNextPage) {
+        resp = await client.getNextPage(resp);
+        transactions.addAll(resp.data);
+      }
+
+      expect(transactions, hasLength(1));
+
+      var txn = transactions.first;
+
+      expect(txn.members, contains(TALL_PLUM_GRIFFIN));
+      expect(txn.hash, 'swbKCzLWfaC5o06aWPwBosWJLuYAn7tTleKXLuCrfBg');
+    });
+
     test('Currently elected hotspots is empty', () async {
       final resp = await client.hotspots.getCurrentlyElectedHotspots();
 
       expect(resp.data, isEmpty);
     });
 
-    test('Get rewards for a known hotspot', () async {
-      var resp = await client.hotspots.getRewards(CHEESY_BRICK_MUSTANG,
-          DateTime.utc(2021, 9, 5), DateTime.utc(2021, 9, 6));
+    test('List hotspot challenges for a given hotspot', () async {
+      var resp = await client.hotspots.listHotspotChallenges(TALL_PLUM_GRIFFIN);
+      var transactions = resp.data;
 
-      var rewards = resp.data;
+      while (transactions.length < 5 && resp.hasNextPage) {
+        resp = await client.getNextPage(resp);
+        transactions.addAll(resp.data);
+      }
+
+      // Challenged another hotspot
+      var txn = transactions.first;
+      expect(txn.hash, '4wtc5fcz_nI4j3EX_zPVnWJ-uBh7BSTgLAsJE22eh_g');
+      expect(txn.challenger, TALL_PLUM_GRIFFIN);
+      expect(txn.path.first.receipt!.origin, 'p2p');
+      expect(txn.path.first.witnesses, isEmpty);
+
+      // Sent Beacon
+      txn = transactions[1];
+      expect(txn.hash, 'mZUnGuLFRSPm_XczHHNk66BIcf1fuh0hLlpBxKynJ2M');
+      expect(txn.path, hasLength(1));
+      expect(txn.path.first.challengee, TALL_PLUM_GRIFFIN);
+      expect(txn.path.first.witnesses, hasLength(1));
+      expect(txn.path.first.witnesses.first.isValid, isFalse);
+
+      // Witnessed Beacon
+      txn = transactions[4];
+      expect(txn.hash, 'FrkHMwA-yoRXa5rjtn9eQuBG21tV6vaTmUi5jfAeKn8');
+      expect(txn.path, hasLength(1));
+      expect(txn.path.first.witnesses, hasLength(1));
+      expect(txn.path.first.witnesses.first.isValid, isFalse);
+      expect(txn.path.first.witnesses.first.gateway, TALL_PLUM_GRIFFIN);
+    });
+
+    test('Get rewards for a known hotspot', () async {
+      final theFifth = DateTime.utc(2021, 9, 5);
+      final theSixth = DateTime.utc(2021, 9, 6);
+      var resp = await client.hotspots
+          .getRewards(CHEESY_BRICK_MUSTANG, theFifth, theSixth);
+      final rewards = resp.data;
 
       while (resp.hasNextPage) {
         resp = await client.getNextPage(resp);
@@ -163,6 +213,21 @@ void main() {
       }
 
       expect(rewards, hasLength(32));
+
+      var sum = 0;
+
+      for (var reward in rewards) {
+        expect(reward.timestamp.isAfter(theFifth), isTrue);
+        expect(reward.timestamp.isBefore(theSixth), isTrue);
+        sum += reward.amount;
+      }
+
+      expect(sum, 56469668);
+
+      var resp2 = await client.hotspots
+          .getRewardTotal(CHEESY_BRICK_MUSTANG, theFifth, theSixth);
+
+      expect(resp2.data.sum, equals(sum));
     });
 
     test('Get rewards for a known hotspot during specific hours', () async {
@@ -198,6 +263,33 @@ void main() {
       }
 
       expect(rewards, hasLength(10));
+    });
+
+    test('Get witnesses/witnessed for a long-offline hotspot', () async {
+      var resp = await client.hotspots.getWitnesses(TALL_PLUM_GRIFFIN);
+
+      expect(resp.data, isEmpty);
+
+      resp = await client.hotspots.getWitnessed(TALL_PLUM_GRIFFIN);
+
+      expect(resp.data, isEmpty);
+    });
+
+    test('Get witnesses/witnessed for an online hotspot', () async {
+      var resp = await client.hotspots.getWitnesses(CHEESY_BRICK_MUSTANG);
+
+      expect(resp.data, isNotEmpty);
+
+      final witnessNames = resp.data.map((h) => h.name).toSet();
+
+      resp = await client.hotspots.getWitnessed(CHEESY_BRICK_MUSTANG);
+
+      expect(resp.data, isNotEmpty);
+
+      final witnessedNames = resp.data.map((h) => h.name).toSet();
+      final intersection = witnessNames.intersection(witnessedNames);
+
+      expect(intersection, isNotEmpty);
     });
   });
 }

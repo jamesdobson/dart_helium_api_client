@@ -6,27 +6,6 @@ part of 'hotspots.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-HeliumHotspotReward _$HeliumHotspotRewardFromJson(Map<String, dynamic> json) =>
-    HeliumHotspotReward(
-      account: json['account'] as String,
-      amount: json['amount'] as int,
-      block: json['block'] as int,
-      gateway: json['gateway'] as String,
-      hash: json['hash'] as String,
-      timestamp: json['timestamp'] as String,
-    );
-
-Map<String, dynamic> _$HeliumHotspotRewardToJson(
-        HeliumHotspotReward instance) =>
-    <String, dynamic>{
-      'account': instance.account,
-      'amount': instance.amount,
-      'block': instance.block,
-      'gateway': instance.gateway,
-      'hash': instance.hash,
-      'timestamp': instance.timestamp,
-    };
-
 HeliumHotspot _$HeliumHotspotFromJson(Map<String, dynamic> json) =>
     HeliumHotspot(
       address: json['address'] as String,
@@ -98,28 +77,35 @@ Map<String, dynamic> _$HeliumHotspotStatusToJson(
       'listen_addrs': instance.listenAddresses,
     };
 
-HeliumGeocode _$HeliumGeocodeFromJson(Map<String, dynamic> json) =>
-    HeliumGeocode(
-      longCity: json['long_city'] as String?,
-      longCountry: json['long_country'] as String?,
-      longState: json['long_state'] as String?,
-      longStreet: json['long_street'] as String?,
-      shortCity: json['short_city'] as String?,
-      shortCountry: json['short_country'] as String?,
-      shortState: json['short_state'] as String?,
-      shortStreet: json['short_street'] as String?,
-      cityId: json['city_id'] as String?,
+HeliumHotspotReward _$HeliumHotspotRewardFromJson(Map<String, dynamic> json) =>
+    HeliumHotspotReward(
+      account: json['account'] as String,
+      gateway: json['gateway'] as String,
+      amount: json['amount'] as int,
+      block: json['block'] as int,
+      hash: json['hash'] as String,
+      timestamp: heliumTimestampFromJson(json['timestamp'] as String),
     );
 
-Map<String, dynamic> _$HeliumGeocodeToJson(HeliumGeocode instance) =>
+Map<String, dynamic> _$HeliumHotspotRewardToJson(
+        HeliumHotspotReward instance) =>
     <String, dynamic>{
-      'long_city': instance.longCity,
-      'long_country': instance.longCountry,
-      'long_state': instance.longState,
-      'long_street': instance.longStreet,
-      'short_city': instance.shortCity,
-      'short_country': instance.shortCountry,
-      'short_state': instance.shortState,
-      'short_street': instance.shortStreet,
-      'city_id': instance.cityId,
+      'account': instance.account,
+      'gateway': instance.gateway,
+      'amount': instance.amount,
+      'block': instance.block,
+      'hash': instance.hash,
+      'timestamp': heliumTimestampToJson(instance.timestamp),
+    };
+
+HeliumHotspotRewardTotal _$HeliumHotspotRewardTotalFromJson(
+        Map<String, dynamic> json) =>
+    HeliumHotspotRewardTotal(
+      sum: json['sum'] as int,
+    );
+
+Map<String, dynamic> _$HeliumHotspotRewardTotalToJson(
+        HeliumHotspotRewardTotal instance) =>
+    <String, dynamic>{
+      'sum': instance.sum,
     };
