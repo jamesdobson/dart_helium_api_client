@@ -1,6 +1,6 @@
+import 'package:helium_api_client/src/converters.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'converters.dart';
 import 'shared.dart';
 
 part 'hotspots.g.dart';

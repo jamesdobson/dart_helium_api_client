@@ -1,5 +1,7 @@
-import 'hotspots.dart';
-import 'transactions.dart';
+import 'package:helium_api_client/src/model/hotspots.dart';
+import 'package:helium_api_client/src/model/oracle_prices.dart';
+import 'package:helium_api_client/src/model/transactions.dart';
+
 import 'request.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -16,10 +18,14 @@ class HeliumClient {
   /// Operations on the Transactions API. (https://docs.helium.com/api/blockchain/transactions)
   late final HeliumTransactionsClient transactions;
 
+  /// Operations on the Oracle Prices API. (https://docs.helium.com/api/blockchain/oracle-prices)
+  late final HeliumOraclePricesClient prices;
+
   HeliumClient({
     baseUrl = STABLE_URL,
   }) : _base = Uri.parse(baseUrl) {
     hotspots = HeliumHotspotClient(this);
+    prices = HeliumOraclePricesClient(this);
     transactions = HeliumTransactionsClient(this);
   }
 
@@ -337,6 +343,33 @@ class HeliumHotspotClient {
       path: '/v1/hotspots/$address/witnessed',
       extractResponse: (json) =>
           HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
+    ));
+  }
+}
+
+/// Operations on the Oracle Prices API.
+/// https://docs.helium.com/api/blockchain/oracle-prices
+class HeliumOraclePricesClient {
+  final HeliumClient _client;
+
+  HeliumOraclePricesClient(this._client);
+
+  /// Gets the current Oracle Price and at which block it took effect.
+  Future<HeliumResponse<HeliumOraclePrice>> getCurrentOraclePrice() async {
+    return _client._doRequest(HeliumRequest(
+      path: '/v1/oracle/prices/current',
+      extractResponse: (json) => HeliumOraclePrice.fromJson(json['data']),
+    ));
+  }
+
+  /// Gets the current and historical Oracle Prices and at which block they
+  /// took effect.
+  Future<HeliumPagedResponse<List<HeliumOraclePrice>>>
+      getCurrentAndHistoricalOraclePrices() async {
+    return _client._doPagedRequest(HeliumPagedRequest(
+      path: '/v1/oracle/prices',
+      extractResponse: (json) =>
+          HeliumRequest.mapDataList(json, (p) => HeliumOraclePrice.fromJson(p)),
     ));
   }
 }

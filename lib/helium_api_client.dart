@@ -7,5 +7,7 @@ export 'src/helium_api_client_base.dart';
 
 export 'src/request.dart';
 
-export 'src/hotspots.dart';
-export 'src/transactions.dart';
+export 'src/model/hotspots.dart';
+export 'src/model/oracle_prices.dart';
+export 'src/model/shared.dart';
+export 'src/model/transactions.dart';
