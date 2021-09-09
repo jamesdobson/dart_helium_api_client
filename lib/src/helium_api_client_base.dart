@@ -106,13 +106,13 @@ class HeliumHotspotClient {
 
   /// Lists known hotspots as registered on the blockchain.
   ///
-  /// The [filterModes] parameter can be used to filter hotspots by how they
+  /// The [modeFilter] parameter can be used to filter hotspots by how they
   /// were added to the blockchain.
   Future<HeliumPagedResponse<List<HeliumHotspot>>> listHotspots(
-      {Set<HeliumHotspotFilterMode> filterModes = const {}}) async {
+      {Set<HeliumHotspotMode> modeFilter = const {}}) async {
     return _client._doPagedRequest(HeliumPagedRequest(
-      path: (filterModes.isNotEmpty)
-          ? '/v1/hotspots?filter_modes=${filterModes.map((e) => e.value).join(',')}'
+      path: (modeFilter.isNotEmpty)
+          ? '/v1/hotspots?filter_modes=${modeFilter.map((e) => e.value).join(',')}'
           : '/v1/hotspots',
       extractResponse: (json) =>
           HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
