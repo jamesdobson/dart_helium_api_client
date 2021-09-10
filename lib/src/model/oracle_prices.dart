@@ -6,7 +6,7 @@ part 'oracle_prices.g.dart';
 @JsonSerializable()
 class HeliumOraclePrice {
   /// The current price of 1 HNT in thousandths of a DC or
-  /// ten-millionths of a USD.
+  /// hundred-millionths of a USD.
   final int price;
 
   /// The block at which the price took effect.
@@ -63,4 +63,31 @@ class HeliumOraclePriceStats {
       _$HeliumOraclePriceStatsFromJson(json);
 
   Map<String, dynamic> toJson() => _$HeliumOraclePriceStatsToJson(this);
+}
+
+@JsonSerializable()
+class HeliumOraclePricePredictions {
+  /// The predicted price of 1 HNT in thousandths of a DC or
+  /// ten-millionths of a USD.
+  final int price;
+
+  /// The time that the predicted price may take effect.
+  @JsonKey(
+    fromJson: heliumBlockTimeFromJson,
+    toJson: heliumBlockTimeToJson,
+  )
+  final DateTime time;
+
+  /// The approximate predicted price of 1 HNT in USD.
+  double get dollars => price / 100000000;
+
+  HeliumOraclePricePredictions({
+    required this.price,
+    required this.time,
+  });
+
+  factory HeliumOraclePricePredictions.fromJson(Map<String, dynamic> json) =>
+      _$HeliumOraclePricePredictionsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HeliumOraclePricePredictionsToJson(this);
 }

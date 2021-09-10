@@ -36,7 +36,6 @@ Please file feature requests and bugs at the [issue tracker][tracker].
 
 ## TODO
 
-* Implement the Oracle Prices API
 * Write an example that computes hotspot earnings in USD
 * Add exceptions for 4xx, 5xx, etc.
 * Add usage documentation to this README

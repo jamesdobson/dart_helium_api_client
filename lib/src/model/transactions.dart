@@ -357,7 +357,7 @@ class HeliumTransactionConsensusGroupV1 extends HeliumTransaction {
 
 @JsonSerializable()
 class HeliumTransactionPriceOracleV1 extends HeliumTransaction {
-  /// The price of 1 HNT in thousandths of a DC or ten-millionths of a USD.
+  /// The price of 1 HNT in thousandths of a DC or hundred-millionths of a USD.
   final int price;
 
   /// The Oracle's public key.

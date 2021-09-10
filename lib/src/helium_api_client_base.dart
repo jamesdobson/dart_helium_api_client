@@ -441,6 +441,54 @@ class HeliumOraclePricesClient {
           json, (p) => HeliumTransactionPriceOracleV1.fromJson(p)),
     ));
   }
+
+  /// Lists the Oracle Price report transactions for the given oracle key.
+  ///
+  /// [minTime] is the first time to include data for.
+  /// [maxTime] is the last time to include data for.
+  /// [limit] is the maximum number of items to return.
+  Future<HeliumPagedResponse<List<HeliumTransactionPriceOracleV1>>>
+      listOracleActivityForOracle(
+    String address, {
+    DateTime? minTime,
+    DateTime? maxTime,
+    int? limit,
+  }) async {
+    return _client._doPagedRequest(HeliumPagedRequest(
+      path: '/v1/oracle/$address/activity',
+      parameters: {
+        'min_time': minTime,
+        'max_time': maxTime,
+        'limit': limit,
+      },
+      extractResponse: (json) => HeliumRequest.mapDataList(
+          json, (p) => HeliumTransactionPriceOracleV1.fromJson(p)),
+    ));
+  }
+
+  /// Returns a list of times when the Oracle Price is expected to change.
+  ///
+  /// The blockchain operates in "block-time" meaning that blocks can come out
+  /// at some schedule close to 1 per minute. Oracles report in
+  /// "wall-clock-time", meaning they report what they believe the price should
+  /// be. If this method returns one or more prices and times, it indicates
+  /// that the chain is expected to adjust the price (based on Oracle reports)
+  /// no earlier than the indicated time to the returned price.
+  ///
+  /// A prediction may not be seen in the blockchain if they are close together
+  /// (within 10 blocks) since block times may cause the blockchain to skip
+  /// to a next predicted price.
+  ///
+  /// If no predictions are returned, the current HNT Oracle Price is valid
+  /// for at least 1 hour.
+  Future<HeliumResponse<List<HeliumOraclePricePredictions>>>
+      getPredictedOraclePrices() {
+    return _client._doRequest(HeliumPagedRequest(
+      path: '/v1/oracle/predictions',
+      extractResponse: (json) => HeliumRequest.mapDataList(
+          json, (p) => HeliumOraclePricePredictions.fromJson(p)),
+    ));
+  }
 }
 
 /// Operations on the Transactions API.

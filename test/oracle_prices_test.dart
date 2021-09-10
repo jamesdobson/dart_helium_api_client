@@ -118,5 +118,42 @@ void main() {
       expect(txns, hasLength(3));
       expect(txns.first.height, 991127);
     });
+
+    test('Get Oracle Price transactions for a specific oracle', () async {
+      final address = '1489qpKWAoLrURcaQEM1wJEViD4mk9WcqZMGhiTFfNGmaz8NFdX';
+      final minTime = DateTime.utc(2021, 9, 1);
+      final maxTime = DateTime.utc(2021, 9, 1, 6);
+      var resp = await client.prices.listOracleActivityForOracle(address,
+          minTime: minTime, maxTime: maxTime);
+      var txns = resp.data;
+
+      while (resp.hasNextPage) {
+        resp = await client.getNextPage(resp);
+        txns.addAll(resp.data);
+      }
+
+      expect(txns, hasLength(4));
+      expect(txns.last.height, 991108);
+      expect(txns.first.height, 991441);
+      expect(txns.map((e) => e.publicKey), everyElement(equals(address)));
+
+      // Make the request again, with a limit.
+      resp = await client.prices.listOracleActivityForOracle(address,
+          minTime: minTime, maxTime: maxTime, limit: 3);
+      txns = resp.data;
+
+      while (resp.hasNextPage) {
+        resp = await client.getNextPage(resp);
+        txns.addAll(resp.data);
+      }
+
+      expect(txns, hasLength(3));
+    });
+
+    test('Get predicted Oracle Prices', () async {
+      var resp = await client.prices.getPredictedOraclePrices();
+
+      expect(resp.data.length, greaterThanOrEqualTo(0));
+    });
   });
 }
