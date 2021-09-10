@@ -10,37 +10,51 @@ class HeliumRequest<D> {
   });
 
   Uri getUri(Uri base) {
-    return base.resolve(_appendParameters(path, parameters.entries));
+    return _createRequestUri(base, path, parameters.entries);
   }
 
-  String _appendParameters(
-      String path, Iterable<MapEntry<String, dynamic>> params) {
-    var hasParameter = path.contains('?');
-    final buf = StringBuffer(path);
+  static Uri _createRequestUri(
+      Uri base, String path, Iterable<MapEntry<String, dynamic>> parameters) {
+    var basePath = base.path;
 
-    for (final p in params) {
-      final v = p.value;
-
-      if (v == null) {
-        continue;
-      }
-
-      buf.write((hasParameter) ? '&' : '?');
-      hasParameter = true;
-
-      buf.write(p.key);
-      buf.write('=');
-
-      if (v is DateTime) {
-        buf.write(v.toUtc().toIso8601String());
-      } else if (v is Iterable<String>) {
-        buf.writeAll(v, ',');
-      } else {
-        buf.write(v.toString());
-      }
+    if (basePath.endsWith('/')) {
+      basePath = basePath.substring(0, -1);
     }
 
-    return buf.toString();
+    if (path.startsWith('/')) {
+      path = path.substring(1);
+    }
+
+    return base.replace(
+      path: '$basePath/$path',
+      queryParameters: _convertParameters(parameters),
+    );
+  }
+
+  static Map<String, dynamic>? _convertParameters(
+      Iterable<MapEntry<String, dynamic>> parameters) {
+    final result = Map.fromEntries(
+      parameters
+          .where((e) => e.value != null) // ignore null parameters
+          .map((e) => MapEntry(e.key, _convertParameter(e.value)))
+          .where((e) => e.value.isNotEmpty), // ignore empty strings
+    );
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return result;
+  }
+
+  static String _convertParameter(dynamic value) {
+    if (value is DateTime) {
+      return value.toUtc().toIso8601String();
+    } else if (value is Iterable<String>) {
+      return value.join(',');
+    }
+
+    return value.toString();
   }
 
   static List<T> mapDataList<T>(
@@ -71,7 +85,7 @@ class HeliumPagedRequest<D> extends HeliumRequest<D> {
       params = params.followedBy({'cursor': cursor}.entries);
     }
 
-    return base.resolve(_appendParameters(path, params));
+    return HeliumRequest._createRequestUri(base, path, params);
   }
 
   HeliumPagedRequest<D> withCursor(final String cursor) {

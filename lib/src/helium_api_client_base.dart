@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:helium_api_client/src/model/hotspots.dart';
 import 'package:helium_api_client/src/model/oracle_prices.dart';
 import 'package:helium_api_client/src/model/transactions.dart';
@@ -22,21 +24,45 @@ class HeliumClient {
   late final HeliumOraclePricesClient prices;
 
   HeliumClient({
-    baseUrl = STABLE_URL,
+    String baseUrl = STABLE_URL,
   }) : _base = Uri.parse(baseUrl) {
     hotspots = HeliumHotspotClient(this);
     prices = HeliumOraclePricesClient(this);
     transactions = HeliumTransactionsClient(this);
   }
 
+  Future<http.Response> _do<T>(final Uri uri) async {
+    final resp;
+
+    try {
+      resp = await http.get(uri);
+    } on IOException catch (e) {
+      throw HeliumException('Network error', uri: uri, cause: e);
+    }
+
+    if (resp.statusCode >= 400) {
+      throw HeliumException(
+          'HTTP error (${resp.statusCode} ${resp.reasonPhrase})',
+          uri: uri);
+    }
+
+    if (resp.statusCode >= 300) {
+      throw HeliumException('Unexpected HTTP redirect (${resp.statusCode})',
+          uri: uri);
+    }
+
+    return resp;
+  }
+
   Future<HeliumResponse<T>> _doRequest<T>(final HeliumRequest<T> req) async {
     final uri = req.getUri(_base);
-    final resp = await http.get(uri);
+    final resp = await _do(uri);
     final Map<String, dynamic> result = json.decode(resp.body);
 
     if (result.containsKey('cursor')) {
-      throw StateError(
-          '`_doRequest` received a paged response, use `_doPagedRequest` instead. (uri=$uri)');
+      throw HeliumException(
+          '`_doRequest` received a paged response, use `_doPagedRequest` instead.',
+          uri: uri);
     }
 
     return HeliumResponse<T>(
@@ -47,7 +73,7 @@ class HeliumClient {
   Future<HeliumPagedResponse<T>> _doPagedRequest<T>(
       final HeliumPagedRequest<T> req) async {
     final uri = req.getUri(_base);
-    final resp = await http.get(uri);
+    final resp = await _do(uri);
     final Map<String, dynamic> result = json.decode(resp.body);
     final cursor = result['cursor'] as String?;
 
@@ -509,9 +535,27 @@ class HeliumTransactionsClient {
 
 class HeliumException implements Exception {
   final String message;
+  final Uri? uri;
+  final Exception? cause;
 
-  const HeliumException([this.message = 'HeliumException']);
+  const HeliumException(this.message, {this.uri, this.cause});
 
   @override
-  String toString() => message;
+  String toString() {
+    final buf = StringBuffer(message);
+
+    if (uri != null) {
+      buf.write(' (uri: "');
+      buf.write(uri);
+      buf.write('")');
+    }
+
+    if (cause != null) {
+      buf.write(' (cause: "');
+      buf.write(cause.toString());
+      buf.write('")');
+    }
+
+    return buf.toString();
+  }
 }

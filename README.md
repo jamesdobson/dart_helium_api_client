@@ -36,7 +36,6 @@ Please file feature requests and bugs at the [issue tracker][tracker].
 
 ## TODO
 
-* Add exceptions for 4xx, 5xx, etc.
 * Add usage documentation to this README
 * Determine where pub.dev documentation comes from and set it up
 * Publish to pub.dev
