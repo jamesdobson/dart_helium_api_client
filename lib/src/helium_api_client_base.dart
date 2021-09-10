@@ -117,9 +117,10 @@ class HeliumHotspotClient {
   Future<HeliumPagedResponse<List<HeliumHotspot>>> listHotspots(
       {Set<HeliumHotspotMode> modeFilter = const {}}) async {
     return _client._doPagedRequest(HeliumPagedRequest(
-      path: (modeFilter.isNotEmpty)
-          ? '/v1/hotspots?filter_modes=${modeFilter.map((e) => e.value).join(',')}'
-          : '/v1/hotspots',
+      path: '/v1/hotspots',
+      parameters: {
+        'filter_modes': modeFilter.map((e) => e.value),
+      },
       extractResponse: (json) =>
           HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
     ));
@@ -162,7 +163,10 @@ class HeliumHotspotClient {
     }
 
     return _client._doRequest(HeliumRequest(
-      path: '/v1/hotspots/name?search=$query',
+      path: '/v1/hotspots/name',
+      parameters: {
+        'search': query,
+      },
       extractResponse: (json) =>
           HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
     ));
@@ -176,8 +180,12 @@ class HeliumHotspotClient {
   Future<HeliumPagedResponse<List<HeliumHotspot>>> searchHotspotsByDistance(
       double lat, double lon, int distance) async {
     return _client._doPagedRequest(HeliumPagedRequest(
-      path:
-          '/v1/hotspots/location/distance?lat=$lat&lon=$lon&distance=$distance',
+      path: '/v1/hotspots/location/distance',
+      parameters: {
+        'lat': lat,
+        'lon': lon,
+        'distance': distance,
+      },
       extractResponse: (json) =>
           HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
     ));
@@ -193,8 +201,13 @@ class HeliumHotspotClient {
   Future<HeliumPagedResponse<List<HeliumHotspot>>> searchHotspotsByBox(
       double swlat, double swlon, double nelat, double nelon) async {
     return _client._doPagedRequest(HeliumPagedRequest(
-      path:
-          '/v1/hotspots/location/box?swlat=$swlat&swlon=$swlon&nelat=$nelat&nelon=$nelon',
+      path: '/v1/hotspots/location/box',
+      parameters: {
+        'swlat': swlat,
+        'swlon': swlon,
+        'nelat': nelat,
+        'nelon': nelon,
+      },
       extractResponse: (json) =>
           HeliumRequest.mapDataList(json, (h) => HeliumHotspot.fromJson(h)),
     ));
@@ -221,9 +234,10 @@ class HeliumHotspotClient {
       String address,
       {Set<HeliumTransactionType> filterTypes = const {}}) async {
     return _client._doPagedRequest(HeliumPagedRequest(
-      path: (filterTypes.isEmpty)
-          ? '/v1/hotspots/$address/activity'
-          : '/v1/hotspots/$address/activity?filter_types=${filterTypes.map((e) => e.value).join(',')}',
+      path: '/v1/hotspots/$address/activity',
+      parameters: {
+        'filter_types': filterTypes.map((e) => e.value),
+      },
       extractResponse: (json) =>
           HeliumRequest.mapDataList(json, (h) => HeliumTransaction.fromJson(h)),
     ));
@@ -242,9 +256,10 @@ class HeliumHotspotClient {
           {Set<HeliumTransactionType> filterTypes = const {}}) async {
     return _client._doPagedRequest(
       HeliumPagedRequest(
-          path: (filterTypes.isEmpty)
-              ? '/v1/hotspots/$address/activity/count'
-              : '/v1/hotspots/$address/activity/count?filter_types=${filterTypes.map((e) => e.value).join(',')}',
+          path: '/v1/hotspots/$address/activity/count',
+          parameters: {
+            'filter_types': filterTypes.map((e) => e.value),
+          },
           extractResponse: (json) {
             final data = json['data'] as Map<String, dynamic>;
             return data.map((key, value) =>
@@ -299,8 +314,11 @@ class HeliumHotspotClient {
   Future<HeliumPagedResponse<List<HeliumHotspotReward>>> getRewards(
       String address, DateTime minTime, DateTime maxTime) async {
     return _client._doPagedRequest(HeliumPagedRequest(
-      path:
-          '/v1/hotspots/$address/rewards?min_time=${minTime.toUtc().toIso8601String()}&max_time=${maxTime.toUtc().toIso8601String()}',
+      path: '/v1/hotspots/$address/rewards',
+      parameters: {
+        'min_time': minTime,
+        'max_time': maxTime,
+      },
       extractResponse: (json) => HeliumRequest.mapDataList(
           json, (r) => HeliumHotspotReward.fromJson(r)),
     ));
@@ -315,8 +333,11 @@ class HeliumHotspotClient {
   Future<HeliumResponse<HeliumHotspotRewardTotal>> getRewardTotal(
       String address, DateTime minTime, DateTime maxTime) async {
     return _client._doRequest(HeliumRequest(
-      path:
-          '/v1/hotspots/$address/rewards/sum?min_time=${minTime.toUtc().toIso8601String()}&max_time=${maxTime.toUtc().toIso8601String()}',
+      path: '/v1/hotspots/$address/rewards/sum',
+      parameters: {
+        'min_time': minTime,
+        'max_time': maxTime,
+      },
       extractResponse: (json) =>
           HeliumHotspotRewardTotal.fromJson(json['data']),
     ));
@@ -370,6 +391,54 @@ class HeliumOraclePricesClient {
       path: '/v1/oracle/prices',
       extractResponse: (json) =>
           HeliumRequest.mapDataList(json, (p) => HeliumOraclePrice.fromJson(p)),
+    ));
+  }
+
+  /// Gets statistics on Oracle Prices.
+  ///
+  /// [minTime] is the first time to include in stats.
+  /// [maxTime] is the last time to include in stats.
+  Future<HeliumResponse<HeliumOraclePriceStats>> getOraclePriceStats(
+      DateTime minTime, DateTime maxTime) async {
+    return _client._doRequest(HeliumRequest(
+      path: '/v1/oracle/prices/stats',
+      parameters: {
+        'min_time': minTime,
+        'max_time': maxTime,
+      },
+      extractResponse: (json) => HeliumOraclePriceStats.fromJson(json['data']),
+    ));
+  }
+
+  /// Gets the Oracle Price at a specific block and at which block it
+  /// initially took effect.
+  Future<HeliumResponse<HeliumOraclePrice>> getOraclePrice(int block) async {
+    return _client._doRequest(HeliumRequest(
+      path: '/v1/oracle/prices/$block',
+      extractResponse: (json) => HeliumOraclePrice.fromJson(json['data']),
+    ));
+  }
+
+  /// Lists the Oracle Price report transactions for all oracle keys.
+  ///
+  /// [minTime] is the first time to include data for.
+  /// [maxTime] is the last time to include data for.
+  /// [limit] is the maximum number of items to return.
+  Future<HeliumPagedResponse<List<HeliumTransactionPriceOracleV1>>>
+      listOracleActivity({
+    DateTime? minTime,
+    DateTime? maxTime,
+    int? limit,
+  }) async {
+    return _client._doPagedRequest(HeliumPagedRequest(
+      path: '/v1/oracle/activity',
+      parameters: {
+        'min_time': minTime,
+        'max_time': maxTime,
+        'limit': limit,
+      },
+      extractResponse: (json) => HeliumRequest.mapDataList(
+          json, (p) => HeliumTransactionPriceOracleV1.fromJson(p)),
     ));
   }
 }

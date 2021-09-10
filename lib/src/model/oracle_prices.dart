@@ -33,3 +33,34 @@ class HeliumOraclePrice {
 
   Map<String, dynamic> toJson() => _$HeliumOraclePriceToJson(this);
 }
+
+@JsonSerializable()
+class HeliumOraclePriceStats {
+  /// The arithmetic mean price of 1 HNT in USD.
+  final double avg;
+
+  /// The maximum price of 1 HNT in USD.
+  final double max;
+
+  /// The median price of 1 HNT in USD.
+  final double median;
+
+  /// The minimum price of 1 HNT in USD.
+  final double min;
+
+  /// The standard deviation of the price of 1 HNT.
+  final double stddev;
+
+  HeliumOraclePriceStats({
+    required this.avg,
+    required this.max,
+    required this.median,
+    required this.min,
+    required this.stddev,
+  });
+
+  factory HeliumOraclePriceStats.fromJson(Map<String, dynamic> json) =>
+      _$HeliumOraclePriceStatsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HeliumOraclePriceStatsToJson(this);
+}

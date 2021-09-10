@@ -135,6 +135,32 @@ Map<String, dynamic> _$HeliumTransactionConsensusGroupV1ToJson(
       'proof': instance.proof,
     };
 
+HeliumTransactionPriceOracleV1 _$HeliumTransactionPriceOracleV1FromJson(
+        Map<String, dynamic> json) =>
+    HeliumTransactionPriceOracleV1(
+      type: heliumTransactionTypeFromJson(json['type'] as String),
+      hash: json['hash'] as String,
+      height: json['height'] as int,
+      time: heliumBlockTimeFromJson(json['time'] as int),
+      price: json['price'] as int,
+      publicKey: json['public_key'] as String,
+      blockHeight: json['block_height'] as int,
+      fee: json['fee'] as int,
+    );
+
+Map<String, dynamic> _$HeliumTransactionPriceOracleV1ToJson(
+        HeliumTransactionPriceOracleV1 instance) =>
+    <String, dynamic>{
+      'type': heliumTransactionTypeToJson(instance.type),
+      'hash': instance.hash,
+      'height': instance.height,
+      'time': heliumBlockTimeToJson(instance.time),
+      'price': instance.price,
+      'public_key': instance.publicKey,
+      'block_height': instance.blockHeight,
+      'fee': instance.fee,
+    };
+
 HeliumTransactionPoCReceiptsV1 _$HeliumTransactionPoCReceiptsV1FromJson(
         Map<String, dynamic> json) =>
     HeliumTransactionPoCReceiptsV1(

@@ -1,14 +1,46 @@
 class HeliumRequest<D> {
-  String path;
-  D Function(Map<String, dynamic>) extractResponse;
+  final String path;
+  final Map<String, dynamic> parameters;
+  final D Function(Map<String, dynamic>) extractResponse;
 
   HeliumRequest({
     required this.path,
+    this.parameters = const {},
     required this.extractResponse,
   });
 
   Uri getUri(Uri base) {
-    return base.resolve(path);
+    return base.resolve(_appendParameters(path, parameters.entries));
+  }
+
+  String _appendParameters(
+      String path, Iterable<MapEntry<String, dynamic>> params) {
+    var hasParameter = path.contains('?');
+    final buf = StringBuffer(path);
+
+    for (final p in params) {
+      final v = p.value;
+
+      if (v == null) {
+        continue;
+      }
+
+      buf.write((hasParameter) ? '&' : '?');
+      hasParameter = true;
+
+      buf.write(p.key);
+      buf.write('=');
+
+      if (v is DateTime) {
+        buf.write(v.toUtc().toIso8601String());
+      } else if (v is Iterable<String>) {
+        buf.writeAll(v, ',');
+      } else {
+        buf.write(v.toString());
+      }
+    }
+
+    return buf.toString();
   }
 
   static List<T> mapDataList<T>(
@@ -22,31 +54,32 @@ class HeliumPagedRequest<D> extends HeliumRequest<D> {
 
   HeliumPagedRequest({
     required String path,
+    Map<String, dynamic> parameters = const {},
     required D Function(Map<String, dynamic>) extractResponse,
     this.cursor,
-  }) : super(path: path, extractResponse: extractResponse);
+  }) : super(
+          path: path,
+          extractResponse: extractResponse,
+          parameters: parameters,
+        );
 
   @override
   Uri getUri(Uri base) {
-    final hasParameters = path.contains('?');
+    var params = parameters.entries;
 
-    return base.resolve(_appendCursor(path, hasParameters));
-  }
-
-  String _appendCursor(String str, bool hasParameters) {
     if (cursor != null) {
-      if (hasParameters) {
-        str += '&cursor=$cursor';
-      } else {
-        str += '?cursor=$cursor';
-      }
+      params = params.followedBy({'cursor': cursor}.entries);
     }
 
-    return str;
+    return base.resolve(_appendParameters(path, params));
   }
 
   HeliumPagedRequest<D> withCursor(final String cursor) {
     return HeliumPagedRequest(
-        path: path, extractResponse: extractResponse, cursor: cursor);
+      path: path,
+      extractResponse: extractResponse,
+      parameters: parameters,
+      cursor: cursor,
+    );
   }
 }

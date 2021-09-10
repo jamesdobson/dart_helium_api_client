@@ -43,6 +43,8 @@ abstract class HeliumTransaction {
         HeliumTransactionConsensusGroupV1.fromJson(json),
     HeliumTransactionType.POC_RECEIPTS_V1: (json) =>
         HeliumTransactionPoCReceiptsV1.fromJson(json),
+    HeliumTransactionType.PRICE_ORACLE_V1: (json) =>
+        HeliumTransactionPriceOracleV1.fromJson(json),
   };
 
   factory HeliumTransaction.fromJson(Map<String, dynamic> json) {
@@ -88,6 +90,8 @@ class HeliumTransactionType {
       HeliumTransactionType._internal('consensus_group_v1');
   static const POC_RECEIPTS_V1 =
       HeliumTransactionType._internal('poc_receipts_v1');
+  static const PRICE_ORACLE_V1 =
+      HeliumTransactionType._internal('price_oracle_v1');
   static const REWARDS_V1 = HeliumTransactionType._internal('rewards_v1');
   static const REWARDS_V2 = HeliumTransactionType._internal('rewards_v2');
   static const TOKEN_BURN_V1 = HeliumTransactionType._internal('token_burn_v1');
@@ -98,6 +102,7 @@ class HeliumTransactionType {
     ASSERT_LOCATION_V2.value: ASSERT_LOCATION_V2,
     CONSENSUS_GROUP_V1.value: CONSENSUS_GROUP_V1,
     POC_RECEIPTS_V1.value: POC_RECEIPTS_V1,
+    PRICE_ORACLE_V1.value: PRICE_ORACLE_V1,
     REWARDS_V1.value: REWARDS_V1,
     REWARDS_V2.value: REWARDS_V2,
     TOKEN_BURN_V1.value: TOKEN_BURN_V1,
@@ -348,6 +353,40 @@ class HeliumTransactionConsensusGroupV1 extends HeliumTransaction {
   @override
   Map<String, dynamic> toJson() =>
       _$HeliumTransactionConsensusGroupV1ToJson(this);
+}
+
+@JsonSerializable()
+class HeliumTransactionPriceOracleV1 extends HeliumTransaction {
+  /// The price of 1 HNT in thousandths of a DC or ten-millionths of a USD.
+  final int price;
+
+  /// The Oracle's public key.
+  @JsonKey(name: 'public_key')
+  final String publicKey;
+
+  /// The block height to report the price.
+  @JsonKey(name: 'block_height')
+  final int blockHeight;
+
+  // The transaction fee, in DC.
+  final int fee;
+
+  HeliumTransactionPriceOracleV1({
+    required HeliumTransactionType type,
+    required String hash,
+    required int height,
+    required DateTime time,
+    required this.price,
+    required this.publicKey,
+    required this.blockHeight,
+    required this.fee,
+  }) : super(type: type, hash: hash, height: height, time: time);
+
+  factory HeliumTransactionPriceOracleV1.fromJson(Map<String, dynamic> json) =>
+      _$HeliumTransactionPriceOracleV1FromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$HeliumTransactionPriceOracleV1ToJson(this);
 }
 
 @JsonSerializable()
