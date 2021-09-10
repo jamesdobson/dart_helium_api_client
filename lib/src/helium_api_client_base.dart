@@ -65,8 +65,17 @@ class HeliumClient {
           uri: uri);
     }
 
+    final T data;
+
+    try {
+      data = req.extractResponse(result);
+    } catch (e) {
+      throw HeliumException('Unable to parse response: "${e.toString()}"',
+          uri: uri, cause: e, body: resp.body);
+    }
+
     return HeliumResponse<T>(
-      data: req.extractResponse(result),
+      data: data,
     );
   }
 
@@ -77,9 +86,18 @@ class HeliumClient {
     final Map<String, dynamic> result = json.decode(resp.body);
     final cursor = result['cursor'] as String?;
 
+    final T data;
+
+    try {
+      data = req.extractResponse(result);
+    } catch (e) {
+      throw HeliumException('Unable to parse response: "${e.toString()}"',
+          uri: uri, cause: e, body: resp.body);
+    }
+
     return HeliumPagedResponse<T>(
       request: req,
-      data: req.extractResponse(result),
+      data: data,
       cursor: cursor,
     );
   }
@@ -536,9 +554,10 @@ class HeliumTransactionsClient {
 class HeliumException implements Exception {
   final String message;
   final Uri? uri;
-  final Exception? cause;
+  final Object? cause;
+  final String? body;
 
-  const HeliumException(this.message, {this.uri, this.cause});
+  const HeliumException(this.message, {this.uri, this.body, this.cause});
 
   @override
   String toString() {
@@ -554,6 +573,12 @@ class HeliumException implements Exception {
       buf.write(' (cause: "');
       buf.write(cause.toString());
       buf.write('")');
+    }
+
+    if (body != null) {
+      buf.write('\nResponse Body:\n');
+      buf.write(body);
+      buf.write('\n---End of Response Body---\n\n');
     }
 
     return buf.toString();
