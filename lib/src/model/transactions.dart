@@ -10,8 +10,8 @@ part 'transactions.g.dart';
 abstract class HeliumTransaction {
   /// The type of transaction.
   @JsonKey(
-    toJson: heliumTransactionTypeToJson,
-    fromJson: heliumTransactionTypeFromJson,
+    toJson: _heliumTransactionTypeToJson,
+    fromJson: _heliumTransactionTypeFromJson,
   )
   final HeliumTransactionType type;
 
@@ -109,11 +109,13 @@ class HeliumTransactionType {
   };
 }
 
-HeliumTransactionType heliumTransactionTypeFromJson(String value) {
+/// A private method that can be referenced from @JsonKey()
+HeliumTransactionType _heliumTransactionTypeFromJson(String value) {
   return HeliumTransactionType.get(value);
 }
 
-String heliumTransactionTypeToJson(HeliumTransactionType type) {
+/// A private method that can be referenced from @JsonKey()
+String _heliumTransactionTypeToJson(HeliumTransactionType type) {
   return type.value;
 }
 
@@ -134,7 +136,7 @@ class HeliumTransactionUnknown extends HeliumTransaction {
 
     data.addAll(json);
 
-    final type = heliumTransactionTypeFromJson(data.remove('type'));
+    final type = _heliumTransactionTypeFromJson(data.remove('type'));
     final hash = data.remove('hash');
     final height = data.remove('height');
     final time = heliumBlockTimeFromJson(data.remove('time'));

@@ -9,7 +9,7 @@ part of 'transactions.dart';
 HeliumTransactionAddGatewayV1 _$HeliumTransactionAddGatewayV1FromJson(
         Map<String, dynamic> json) =>
     HeliumTransactionAddGatewayV1(
-      type: heliumTransactionTypeFromJson(json['type'] as String),
+      type: _heliumTransactionTypeFromJson(json['type'] as String),
       hash: json['hash'] as String,
       height: json['height'] as int,
       time: heliumBlockTimeFromJson(json['time'] as int),
@@ -23,7 +23,7 @@ HeliumTransactionAddGatewayV1 _$HeliumTransactionAddGatewayV1FromJson(
 Map<String, dynamic> _$HeliumTransactionAddGatewayV1ToJson(
         HeliumTransactionAddGatewayV1 instance) =>
     <String, dynamic>{
-      'type': heliumTransactionTypeToJson(instance.type),
+      'type': _heliumTransactionTypeToJson(instance.type),
       'hash': instance.hash,
       'height': instance.height,
       'time': heliumBlockTimeToJson(instance.time),
@@ -37,7 +37,7 @@ Map<String, dynamic> _$HeliumTransactionAddGatewayV1ToJson(
 HeliumTransactionAssertLocationV1 _$HeliumTransactionAssertLocationV1FromJson(
         Map<String, dynamic> json) =>
     HeliumTransactionAssertLocationV1(
-      type: heliumTransactionTypeFromJson(json['type'] as String),
+      type: _heliumTransactionTypeFromJson(json['type'] as String),
       hash: json['hash'] as String,
       height: json['height'] as int,
       time: heliumBlockTimeFromJson(json['time'] as int),
@@ -55,7 +55,7 @@ HeliumTransactionAssertLocationV1 _$HeliumTransactionAssertLocationV1FromJson(
 Map<String, dynamic> _$HeliumTransactionAssertLocationV1ToJson(
         HeliumTransactionAssertLocationV1 instance) =>
     <String, dynamic>{
-      'type': heliumTransactionTypeToJson(instance.type),
+      'type': _heliumTransactionTypeToJson(instance.type),
       'hash': instance.hash,
       'height': instance.height,
       'time': heliumBlockTimeToJson(instance.time),
@@ -73,7 +73,7 @@ Map<String, dynamic> _$HeliumTransactionAssertLocationV1ToJson(
 HeliumTransactionAssertLocationV2 _$HeliumTransactionAssertLocationV2FromJson(
         Map<String, dynamic> json) =>
     HeliumTransactionAssertLocationV2(
-      type: heliumTransactionTypeFromJson(json['type'] as String),
+      type: _heliumTransactionTypeFromJson(json['type'] as String),
       hash: json['hash'] as String,
       height: json['height'] as int,
       time: heliumBlockTimeFromJson(json['time'] as int),
@@ -93,7 +93,7 @@ HeliumTransactionAssertLocationV2 _$HeliumTransactionAssertLocationV2FromJson(
 Map<String, dynamic> _$HeliumTransactionAssertLocationV2ToJson(
         HeliumTransactionAssertLocationV2 instance) =>
     <String, dynamic>{
-      'type': heliumTransactionTypeToJson(instance.type),
+      'type': _heliumTransactionTypeToJson(instance.type),
       'hash': instance.hash,
       'height': instance.height,
       'time': heliumBlockTimeToJson(instance.time),
@@ -113,7 +113,7 @@ Map<String, dynamic> _$HeliumTransactionAssertLocationV2ToJson(
 HeliumTransactionConsensusGroupV1 _$HeliumTransactionConsensusGroupV1FromJson(
         Map<String, dynamic> json) =>
     HeliumTransactionConsensusGroupV1(
-      type: heliumTransactionTypeFromJson(json['type'] as String),
+      type: _heliumTransactionTypeFromJson(json['type'] as String),
       hash: json['hash'] as String,
       height: json['height'] as int,
       time: heliumBlockTimeFromJson(json['time'] as int),
@@ -126,7 +126,7 @@ HeliumTransactionConsensusGroupV1 _$HeliumTransactionConsensusGroupV1FromJson(
 Map<String, dynamic> _$HeliumTransactionConsensusGroupV1ToJson(
         HeliumTransactionConsensusGroupV1 instance) =>
     <String, dynamic>{
-      'type': heliumTransactionTypeToJson(instance.type),
+      'type': _heliumTransactionTypeToJson(instance.type),
       'hash': instance.hash,
       'height': instance.height,
       'time': heliumBlockTimeToJson(instance.time),
@@ -138,7 +138,7 @@ Map<String, dynamic> _$HeliumTransactionConsensusGroupV1ToJson(
 HeliumTransactionPriceOracleV1 _$HeliumTransactionPriceOracleV1FromJson(
         Map<String, dynamic> json) =>
     HeliumTransactionPriceOracleV1(
-      type: heliumTransactionTypeFromJson(json['type'] as String),
+      type: _heliumTransactionTypeFromJson(json['type'] as String),
       hash: json['hash'] as String,
       height: json['height'] as int,
       time: heliumBlockTimeFromJson(json['time'] as int),
@@ -151,7 +151,7 @@ HeliumTransactionPriceOracleV1 _$HeliumTransactionPriceOracleV1FromJson(
 Map<String, dynamic> _$HeliumTransactionPriceOracleV1ToJson(
         HeliumTransactionPriceOracleV1 instance) =>
     <String, dynamic>{
-      'type': heliumTransactionTypeToJson(instance.type),
+      'type': _heliumTransactionTypeToJson(instance.type),
       'hash': instance.hash,
       'height': instance.height,
       'time': heliumBlockTimeToJson(instance.time),
@@ -164,7 +164,7 @@ Map<String, dynamic> _$HeliumTransactionPriceOracleV1ToJson(
 HeliumTransactionPoCReceiptsV1 _$HeliumTransactionPoCReceiptsV1FromJson(
         Map<String, dynamic> json) =>
     HeliumTransactionPoCReceiptsV1(
-      type: heliumTransactionTypeFromJson(json['type'] as String),
+      type: _heliumTransactionTypeFromJson(json['type'] as String),
       hash: json['hash'] as String,
       height: json['height'] as int,
       time: heliumBlockTimeFromJson(json['time'] as int),
@@ -186,7 +186,7 @@ HeliumTransactionPoCReceiptsV1 _$HeliumTransactionPoCReceiptsV1FromJson(
 Map<String, dynamic> _$HeliumTransactionPoCReceiptsV1ToJson(
         HeliumTransactionPoCReceiptsV1 instance) =>
     <String, dynamic>{
-      'type': heliumTransactionTypeToJson(instance.type),
+      'type': _heliumTransactionTypeToJson(instance.type),
       'hash': instance.hash,
       'height': instance.height,
       'time': heliumBlockTimeToJson(instance.time),

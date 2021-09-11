@@ -1,6 +1,6 @@
 name: helium_api_client
-description: A client for the Helium API (docs.helium.com/api/)
-version: 0.1.0
+description: A client for consuming the Helium APIs (https://docs.helium.com/api/).
+version: 0.1.1
 homepage: https://github.com/jamesdobson/dart_helium_api_client
 
 environment:

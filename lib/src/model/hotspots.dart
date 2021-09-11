@@ -81,8 +81,8 @@ class HeliumHotspot {
 
   /// The type of hotspot.
   @JsonKey(
-    toJson: heliumHotspotModeToJson,
-    fromJson: heliumHotspotModeFromJson,
+    toJson: _heliumHotspotModeToJson,
+    fromJson: _heliumHotspotModeFromJson,
   )
   final HeliumHotspotMode mode;
 
@@ -165,11 +165,13 @@ class HeliumHotspotMode {
   };
 }
 
-HeliumHotspotMode heliumHotspotModeFromJson(String json) {
+/// A private method that can be referenced from @JsonKey()
+HeliumHotspotMode _heliumHotspotModeFromJson(String json) {
   return HeliumHotspotMode.parse(json);
 }
 
-String heliumHotspotModeToJson(HeliumHotspotMode mode) {
+/// A private method that can be referenced from @JsonKey()
+String _heliumHotspotModeToJson(HeliumHotspotMode mode) {
   return mode.value;
 }
 

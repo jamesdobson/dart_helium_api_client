@@ -24,7 +24,7 @@ HeliumHotspot _$HeliumHotspotFromJson(Map<String, dynamic> json) =>
       rewardScale: (json['reward_scale'] as num?)?.toDouble(),
       payer: json['payer'] as String?,
       owner: json['owner'] as String,
-      mode: heliumHotspotModeFromJson(json['mode'] as String),
+      mode: _heliumHotspotModeFromJson(json['mode'] as String),
       status:
           HeliumHotspotStatus.fromJson(json['status'] as Map<String, dynamic>),
       lastPoCChallenge: json['last_poc_challenge'] as int?,
@@ -50,7 +50,7 @@ Map<String, dynamic> _$HeliumHotspotToJson(HeliumHotspot instance) =>
       'reward_scale': instance.rewardScale,
       'payer': instance.payer,
       'owner': instance.owner,
-      'mode': heliumHotspotModeToJson(instance.mode),
+      'mode': _heliumHotspotModeToJson(instance.mode),
       'status': instance.status,
       'last_poc_challenge': instance.lastPoCChallenge,
       'last_change_block': instance.lastChangeBlock,
