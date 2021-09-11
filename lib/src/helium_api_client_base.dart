@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:helium_api_client/src/model/hotspots.dart';
 import 'package:helium_api_client/src/model/oracle_prices.dart';
 import 'package:helium_api_client/src/model/transactions.dart';
@@ -36,7 +34,7 @@ class HeliumClient {
 
     try {
       resp = await http.get(uri);
-    } on IOException catch (e) {
+    } catch (e) {
       throw HeliumException('Network error', uri: uri, cause: e);
     }
 
