@@ -6,7 +6,7 @@ import 'package:helium_api_client/helium_api_client.dart';
 void main() async {
   final client = HeliumBlockchainClient();
   final tally = HashMap<String, int>();
-  var response = await client.hotspots.listHotspots();
+  var response = await client.hotspots.getAll();
 
   addToTally(tally, response.data);
 
@@ -17,13 +17,29 @@ void main() async {
 
   print('Done reading API.');
 
-  var collisions = tally.entries.where((e) => e.value > 1);
+  final collisions = tally.entries.where((e) => e.value > 1);
+  final reverseCollisions = <int, List<String>>{};
 
   for (final collision in collisions) {
-    print('${collision.key}: ${collision.value}');
+    reverseCollisions.update(
+      collision.value,
+      (value) => value + [collision.key],
+      ifAbsent: () => [collision.key],
+    );
   }
 
-  print('Done.');
+  final sorted = reverseCollisions.keys.toList();
+
+  sorted.sort((a, b) => a.compareTo(b));
+
+  for (final count in sorted) {
+    print('\n===== Collisions of $count Hotspot Names =====');
+    for (final collision in reverseCollisions[count]!) {
+      print(collision);
+    }
+  }
+
+  print('\nDone.');
 }
 
 void addToTally(Map<String, int> tally, List<HeliumHotspot> hotspots) {

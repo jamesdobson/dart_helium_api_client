@@ -7,7 +7,7 @@ void main() async {
       '11yXFNu9Je9gvVfyuA8jS8z6faNcZW7kPwPApWYThTk416LGmU'; // acidic red mouse
   //'11cxkqa2PjpJ9YgY9qK3Njn4uSFu6dyK9xV8XE4ahFSqN1YN2db'; // tall plum griffin
   var client = HeliumBlockchainClient();
-  var hotspotResp = await client.hotspots.getHotspotForAddress(address);
+  var hotspotResp = await client.hotspots.get(address);
 
   print('Current:');
   print('\tHotspot: ${hotspotResp.data.name}');
@@ -22,7 +22,7 @@ void main() async {
   print('');
   print('===== Location History =====');
 
-  var resp = await client.hotspots.listHotspotActivity(
+  var resp = await client.hotspots.getActivity(
     address,
     filterTypes: {
       HeliumTransactionType.ASSERT_LOCATION_V1,

@@ -17,7 +17,7 @@ void main() {
     const BROOKLINE_MA = 'YnJvb2tsaW5lbWFzc2FjaHVzZXR0c3VuaXRlZCBzdGF0ZXM';
 
     test('List hotspots returns a couple pages of results', () async {
-      var resp = await client.hotspots.listHotspots();
+      var resp = await client.hotspots.getAll();
 
       expect(resp.data, isNotEmpty);
       expect(resp.hasNextPage, isTrue);
@@ -26,8 +26,7 @@ void main() {
     });
 
     test('Get a known hotspot', () async {
-      final resp =
-          await client.hotspots.getHotspotForAddress(CHEESY_BRICK_MUSTANG);
+      final resp = await client.hotspots.get(CHEESY_BRICK_MUSTANG);
 
       expect(resp.data.address, CHEESY_BRICK_MUSTANG);
       expect(resp.data.name, 'cheesy-brick-mustang');
@@ -40,7 +39,7 @@ void main() {
     });
 
     test('Gets hotspots with a given name', () async {
-      final resp = await client.hotspots.getHotspotsForName('soft-candy-orca');
+      final resp = await client.hotspots.getByName('soft-candy-orca');
 
       expect(resp.data.length, greaterThan(1));
 
@@ -55,7 +54,7 @@ void main() {
     });
 
     test('Searches for hotspots given a search term', () async {
-      final resp = await client.hotspots.searchHotspotsForName('old plum');
+      final resp = await client.hotspots.findByName('old plum');
 
       expect(resp.data.length, greaterThan(1));
 
@@ -69,8 +68,8 @@ void main() {
     test('Search for hotspots within a distance of a given lat/lon coordinate',
         () async {
       // Example from https://docs.helium.com/api/blockchain/hotspots#hotspot-location-distance-search
-      final resp = await client.hotspots.searchHotspotsByDistance(
-          38.12129445739087, -122.52885074963571, 1000);
+      final resp = await client.hotspots
+          .getByDistance(38.12129445739087, -122.52885074963571, 1000);
 
       expect(resp.data.map((e) => e.name),
           containsAll(['curly-berry-coyote', 'immense-eggplant-stallion']));
@@ -78,8 +77,8 @@ void main() {
 
     test('Search for hotspots within a given lat/lon box', () async {
       // Example from https://docs.helium.com/api/blockchain/hotspots#hotspot-location-box-search
-      final resp = await client.hotspots.searchHotspotsByBox(
-          38.0795392, -122.5671627, 38.1588012, -122.5046937);
+      final resp = await client.hotspots
+          .getByBox(38.0795392, -122.5671627, 38.1588012, -122.5046937);
 
       expect(resp.data.map((e) => e.name),
           containsAll(['curly-berry-coyote', 'immense-eggplant-stallion']));
@@ -87,14 +86,13 @@ void main() {
 
     test('Search for hotspots within a given h3 index', () async {
       // Example from https://docs.helium.com/api/blockchain/hotspots#hotspots-for-h3-index
-      final resp =
-          await client.hotspots.searchHotspotsByH3Index('882aa38c2bfffff');
+      final resp = await client.hotspots.getByH3Index('882aa38c2bfffff');
 
       expect(resp.data.map((e) => e.name), contains('zesty-cinnamon-lobster'));
     });
 
     test('List activity for a given hotspot', () async {
-      var resp = await client.hotspots.listHotspotActivity(
+      var resp = await client.hotspots.getActivity(
         TALL_PLUM_GRIFFIN,
         filterTypes: {
           HeliumTransactionType.ADD_GATEWAY_V1,
@@ -121,8 +119,7 @@ void main() {
     });
 
     test('Get activity counts for a given hotspot', () async {
-      var resp =
-          await client.hotspots.getHotspotActivityCounts(TALL_PLUM_GRIFFIN);
+      var resp = await client.hotspots.getActivityCounts(TALL_PLUM_GRIFFIN);
 
       expect(resp.data[HeliumTransactionType.ADD_GATEWAY_V1], 1);
       expect(resp.data[HeliumTransactionType.ASSERT_LOCATION_V1], 1);
@@ -132,7 +129,7 @@ void main() {
 
     test('Get selected activity counts for a given hotspot', () async {
       var resp = await client.hotspots
-          .getHotspotActivityCounts(TALL_PLUM_GRIFFIN, filterTypes: {
+          .getActivityCounts(TALL_PLUM_GRIFFIN, filterTypes: {
         HeliumTransactionType.REWARDS_V1,
         HeliumTransactionType.ADD_GATEWAY_V1,
         HeliumTransactionType.TOKEN_BURN_V1
@@ -145,7 +142,7 @@ void main() {
     });
 
     test('List hotspot elections for a given hotspot', () async {
-      var resp = await client.hotspots.listHotspotElections(TALL_PLUM_GRIFFIN);
+      var resp = await client.hotspots.getElections(TALL_PLUM_GRIFFIN);
       var transactions = resp.data;
 
       while (resp.hasNextPage) {
@@ -168,7 +165,7 @@ void main() {
     });
 
     test('List hotspot challenges for a given hotspot', () async {
-      var resp = await client.hotspots.listHotspotChallenges(TALL_PLUM_GRIFFIN);
+      var resp = await client.hotspots.getPoCReceipts(TALL_PLUM_GRIFFIN);
       var transactions = resp.data;
 
       while (transactions.length < 5 && resp.hasNextPage) {

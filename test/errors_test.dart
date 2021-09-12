@@ -8,7 +8,7 @@ void main() {
           HeliumBlockchainClient(baseUrl: 'https://api.helium.io/err');
 
       try {
-        await client.prices.getCurrentOraclePrice();
+        await client.prices.getCurrent();
         fail('Expected a HeliumException');
       } on HeliumException catch (e) {
         expect(e.message, contains('404'));
@@ -16,7 +16,7 @@ void main() {
       }
 
       try {
-        await client.prices.listOracleActivity();
+        await client.prices.getAllActivity();
         fail('Expected a HeliumException');
       } on HeliumException catch (e) {
         expect(e.message, contains('404'));
@@ -29,7 +29,7 @@ void main() {
           HeliumBlockchainClient(baseUrl: 'https://apierr.helium.io');
 
       try {
-        await client.prices.getCurrentOraclePrice();
+        await client.prices.getCurrent();
         fail('Expected a HeliumException');
       } on HeliumException catch (e) {
         expect(e.toString(), contains('Network error'));
@@ -37,7 +37,7 @@ void main() {
       }
 
       try {
-        await client.prices.listOracleActivity();
+        await client.prices.getAllActivity();
         fail('Expected a HeliumException');
       } on HeliumException catch (e) {
         expect(e.toString(), contains('Network error'));

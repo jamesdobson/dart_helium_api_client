@@ -25,7 +25,7 @@ void main() async {
   print(
       'Block,Timestamp,Reward (HNT),HNT Price in hundred-millionths of USD,Approx reward in USD');
   for (final r in rewards) {
-    final resp = await client.prices.getOraclePrice(r.block);
+    final resp = await client.prices.getByBlock(r.block);
     final hntPrice = resp.data.price;
     final usdAmount = hntPrice / PRICE_RESOLUTION * r.amount / PRICE_RESOLUTION;
 

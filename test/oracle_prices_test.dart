@@ -6,7 +6,7 @@ void main() {
     final client = HeliumBlockchainClient();
 
     test('Get the current Oracle Price', () async {
-      var resp = await client.prices.getCurrentOraclePrice();
+      var resp = await client.prices.getCurrent();
 
       expect(resp.data.block, greaterThan(0));
       expect(resp.data.price, greaterThan(0));
@@ -14,7 +14,7 @@ void main() {
     });
 
     test('Get the current and some historic Oracle Prices', () async {
-      var resp = await client.prices.getCurrentAndHistoricalOraclePrices();
+      var resp = await client.prices.getCurrentAndHistoric();
       var prices = resp.data;
 
       expect(resp.hasNextPage, isTrue);
@@ -35,7 +35,7 @@ void main() {
         () async {
       final endTime = DateTime.now();
       final startTime = endTime.subtract(Duration(days: 7));
-      var resp = await client.prices.getOraclePriceStats(startTime, endTime);
+      var resp = await client.prices.getStats(startTime, endTime);
 
       expect(resp.data.avg, greaterThan(0));
       expect(resp.data.avg, greaterThanOrEqualTo(resp.data.min));
@@ -54,7 +54,7 @@ void main() {
     });
 
     test('Verify Oracle Price statistics for a known time period', () async {
-      var resp = await client.prices.getOraclePriceStats(
+      var resp = await client.prices.getStats(
         DateTime.utc(2021, 8, 1),
         DateTime.utc(2021, 8, 31, 23, 59, 59),
       );
@@ -67,13 +67,13 @@ void main() {
     });
 
     test('Get the Oracle Price for some known blocks', () async {
-      var resp = await client.prices.getOraclePrice(1004127);
+      var resp = await client.prices.getByBlock(1004127);
 
       expect(resp.data.price, 2160778750);
       expect(resp.data.block, 1004120);
       expect(resp.data.timestamp, DateTime.utc(2021, 9, 9, 21, 8, 36));
 
-      resp = await client.prices.getOraclePrice(1);
+      resp = await client.prices.getByBlock(1);
 
       expect(resp.data.price, isZero);
       expect(resp.data.block, 1);
@@ -82,7 +82,7 @@ void main() {
 
     test('Get first page of Oracle Price transactions from the blockchain',
         () async {
-      var resp = await client.prices.listOracleActivity();
+      var resp = await client.prices.getAllActivity();
 
       expect(resp.data, isNotEmpty);
       expect(resp.hasNextPage, isTrue);
@@ -92,7 +92,7 @@ void main() {
       final minTime = DateTime.utc(2021, 9, 1);
       final maxTime = DateTime.utc(2021, 9, 1, 1);
       var resp = await client.prices
-          .listOracleActivity(minTime: minTime, maxTime: maxTime);
+          .getAllActivity(minTime: minTime, maxTime: maxTime);
       var txns = resp.data;
 
       while (resp.hasNextPage) {
@@ -107,7 +107,7 @@ void main() {
 
       // Make the request again, with a limit.
       resp = await client.prices
-          .listOracleActivity(minTime: minTime, maxTime: maxTime, limit: 3);
+          .getAllActivity(minTime: minTime, maxTime: maxTime, limit: 3);
       txns = resp.data;
 
       while (resp.hasNextPage) {
@@ -123,8 +123,8 @@ void main() {
       final address = '1489qpKWAoLrURcaQEM1wJEViD4mk9WcqZMGhiTFfNGmaz8NFdX';
       final minTime = DateTime.utc(2021, 9, 1);
       final maxTime = DateTime.utc(2021, 9, 1, 6);
-      var resp = await client.prices.listOracleActivityForOracle(address,
-          minTime: minTime, maxTime: maxTime);
+      var resp = await client.prices
+          .getActivity(address, minTime: minTime, maxTime: maxTime);
       var txns = resp.data;
 
       while (resp.hasNextPage) {
@@ -138,8 +138,8 @@ void main() {
       expect(txns.map((e) => e.publicKey), everyElement(equals(address)));
 
       // Make the request again, with a limit.
-      resp = await client.prices.listOracleActivityForOracle(address,
-          minTime: minTime, maxTime: maxTime, limit: 3);
+      resp = await client.prices
+          .getActivity(address, minTime: minTime, maxTime: maxTime, limit: 3);
       txns = resp.data;
 
       while (resp.hasNextPage) {
@@ -151,7 +151,7 @@ void main() {
     });
 
     test('Get predicted Oracle Prices', () async {
-      var resp = await client.prices.getPredictedOraclePrices();
+      var resp = await client.prices.getPredicted();
 
       expect(resp.data.length, greaterThanOrEqualTo(0));
     });

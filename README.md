@@ -23,7 +23,7 @@ from the `data` property on the response.
 
 ```dart
 final client = HeliumBlockchainClient();
-var resp = await client.prices.getCurrentOraclePrice();
+var resp = await client.prices.getCurrent();
 print(resp.data.price);
 ```
 
@@ -33,7 +33,7 @@ next page of results (also a `HeliumPagedResponse` object), call
 
 ```dart
 final client = HeliumBlockchainClient();
-var resp = await client.prices.getCurrentAndHistoricalOraclePrices();
+var resp = await client.prices.getCurrentAndHistoric();
 print(resp.data.length);
 resp = await client.getNextPage(resp);
 print(resp.data.length);

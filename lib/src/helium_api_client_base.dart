@@ -175,7 +175,7 @@ class HeliumHotspotClient {
   ///
   /// The [modeFilter] parameter can be used to filter hotspots by how they
   /// were added to the blockchain.
-  Future<HeliumPagedResponse<List<HeliumHotspot>>> listHotspots(
+  Future<HeliumPagedResponse<List<HeliumHotspot>>> getAll(
       {Set<HeliumHotspotMode> modeFilter = const {}}) async {
     return _client._doPagedRequest(HeliumPagedRequest(
       path: '/v1/hotspots',
@@ -190,8 +190,7 @@ class HeliumHotspotClient {
   /// Fetches the hotspot with the given address.
   ///
   /// [address] is the B58 address of the hotspot.
-  Future<HeliumResponse<HeliumHotspot>> getHotspotForAddress(
-      String address) async {
+  Future<HeliumResponse<HeliumHotspot>> get(String address) async {
     return _client._doRequest(HeliumRequest(
       path: '/v1/hotspots/$address',
       extractResponse: (json) => HeliumHotspot.fromJson(json['data']),
@@ -203,8 +202,7 @@ class HeliumHotspotClient {
   /// The name must be all lower-case with dashes between the words, e.g.
   /// 'tall-plum-griffin'. Because of collisions in the Angry Purple Tiger
   /// algorithm, the given name might map to more than one hotspot.
-  Future<HeliumResponse<List<HeliumHotspot>>> getHotspotsForName(
-      String name) async {
+  Future<HeliumResponse<List<HeliumHotspot>>> getByName(String name) async {
     return _client._doRequest(HeliumRequest(
       path: '/v1/hotspots/name/$name',
       extractResponse: (json) =>
@@ -216,8 +214,7 @@ class HeliumHotspotClient {
   ///
   /// The [query] parameter needs to be at least one character, with 3 or more
   /// recommended.
-  Future<HeliumResponse<List<HeliumHotspot>>> searchHotspotsForName(
-      String query) async {
+  Future<HeliumResponse<List<HeliumHotspot>>> findByName(String query) async {
     if (query.isEmpty) {
       throw ArgumentError.value(query, 'query',
           'The `query` parameter must be at least one character in length.');
@@ -238,7 +235,7 @@ class HeliumHotspotClient {
   ///
   /// The [lat] and [lon] coordinates are measured in degrees.
   /// The [distance] is measured in metres.
-  Future<HeliumPagedResponse<List<HeliumHotspot>>> searchHotspotsByDistance(
+  Future<HeliumPagedResponse<List<HeliumHotspot>>> getByDistance(
       double lat, double lon, int distance) async {
     return _client._doPagedRequest(HeliumPagedRequest(
       path: '/v1/hotspots/location/distance',
@@ -259,7 +256,7 @@ class HeliumHotspotClient {
   /// [swlat] and [swlon].
   /// The north-eastern corner of the box is given by lat/lon pair
   /// [nelat] and [nelon].
-  Future<HeliumPagedResponse<List<HeliumHotspot>>> searchHotspotsByBox(
+  Future<HeliumPagedResponse<List<HeliumHotspot>>> getByBox(
       double swlat, double swlon, double nelat, double nelon) async {
     return _client._doPagedRequest(HeliumPagedRequest(
       path: '/v1/hotspots/location/box',
@@ -277,7 +274,7 @@ class HeliumHotspotClient {
   /// Fetches the hotspots which are in the given H3 index.
   ///
   /// The supported H3 indices are currently limited to resolution 8.
-  Future<HeliumPagedResponse<List<HeliumHotspot>>> searchHotspotsByH3Index(
+  Future<HeliumPagedResponse<List<HeliumHotspot>>> getByH3Index(
       String h3index) async {
     return _client._doPagedRequest(HeliumPagedRequest(
       path: '/v1/hotspots/hex/$h3index',
@@ -291,7 +288,7 @@ class HeliumHotspotClient {
   /// [address] is the B58 address of the hotspot.
   /// [filterTypes] is a list of transaction types to retrieve. If empty, all
   /// transactions are listed.
-  Future<HeliumPagedResponse<List<HeliumTransaction>>> listHotspotActivity(
+  Future<HeliumPagedResponse<List<HeliumTransaction>>> getActivity(
       String address,
       {Set<HeliumTransactionType> filterTypes = const {}}) async {
     return _client._doPagedRequest(HeliumPagedRequest(
@@ -312,9 +309,9 @@ class HeliumHotspotClient {
   /// including ones with a count of zero.
   ///
   /// [address] is the B58 address of the hotspot.
-  Future<HeliumResponse<Map<HeliumTransactionType, int>>>
-      getHotspotActivityCounts(String address,
-          {Set<HeliumTransactionType> filterTypes = const {}}) async {
+  Future<HeliumResponse<Map<HeliumTransactionType, int>>> getActivityCounts(
+      String address,
+      {Set<HeliumTransactionType> filterTypes = const {}}) async {
     return _client._doPagedRequest(
       HeliumPagedRequest(
           path: '/v1/hotspots/$address/activity/count',
@@ -334,7 +331,7 @@ class HeliumHotspotClient {
   ///
   /// [address] is the B58 address of the hotspot.
   Future<HeliumPagedResponse<List<HeliumTransactionConsensusGroupV1>>>
-      listHotspotElections(String address) async {
+      getElections(String address) async {
     return _client._doPagedRequest(HeliumPagedRequest(
       path: '/v1/hotspots/$address/elections',
       extractResponse: (json) => HeliumRequest.mapDataList(
@@ -358,7 +355,7 @@ class HeliumHotspotClient {
   ///
   /// [address] is the B58 address of the hotspot.
   Future<HeliumPagedResponse<List<HeliumTransactionPoCReceiptsV1>>>
-      listHotspotChallenges(String address) async {
+      getPoCReceipts(String address) async {
     return _client._doPagedRequest(HeliumPagedRequest(
       path: '/v1/hotspots/$address/challenges',
       extractResponse: (json) => HeliumRequest.mapDataList(
@@ -438,7 +435,7 @@ class HeliumOraclePricesClient {
   HeliumOraclePricesClient._(this._client);
 
   /// Gets the current Oracle Price and at which block it took effect.
-  Future<HeliumResponse<HeliumOraclePrice>> getCurrentOraclePrice() async {
+  Future<HeliumResponse<HeliumOraclePrice>> getCurrent() async {
     return _client._doRequest(HeliumRequest(
       path: '/v1/oracle/prices/current',
       extractResponse: (json) => HeliumOraclePrice.fromJson(json['data']),
@@ -448,7 +445,7 @@ class HeliumOraclePricesClient {
   /// Gets the current and historical Oracle Prices and at which block they
   /// took effect.
   Future<HeliumPagedResponse<List<HeliumOraclePrice>>>
-      getCurrentAndHistoricalOraclePrices() async {
+      getCurrentAndHistoric() async {
     return _client._doPagedRequest(HeliumPagedRequest(
       path: '/v1/oracle/prices',
       extractResponse: (json) =>
@@ -460,7 +457,7 @@ class HeliumOraclePricesClient {
   ///
   /// [minTime] is the first time to include in stats.
   /// [maxTime] is the last time to include in stats.
-  Future<HeliumResponse<HeliumOraclePriceStats>> getOraclePriceStats(
+  Future<HeliumResponse<HeliumOraclePriceStats>> getStats(
       DateTime minTime, DateTime maxTime) async {
     return _client._doRequest(HeliumRequest(
       path: '/v1/oracle/prices/stats',
@@ -474,7 +471,7 @@ class HeliumOraclePricesClient {
 
   /// Gets the Oracle Price at a specific block and at which block it
   /// initially took effect.
-  Future<HeliumResponse<HeliumOraclePrice>> getOraclePrice(int block) async {
+  Future<HeliumResponse<HeliumOraclePrice>> getByBlock(int block) async {
     return _client._doRequest(HeliumRequest(
       path: '/v1/oracle/prices/$block',
       extractResponse: (json) => HeliumOraclePrice.fromJson(json['data']),
@@ -487,7 +484,7 @@ class HeliumOraclePricesClient {
   /// [maxTime] is the last time to include data for.
   /// [limit] is the maximum number of items to return.
   Future<HeliumPagedResponse<List<HeliumTransactionPriceOracleV1>>>
-      listOracleActivity({
+      getAllActivity({
     DateTime? minTime,
     DateTime? maxTime,
     int? limit,
@@ -509,8 +506,7 @@ class HeliumOraclePricesClient {
   /// [minTime] is the first time to include data for.
   /// [maxTime] is the last time to include data for.
   /// [limit] is the maximum number of items to return.
-  Future<HeliumPagedResponse<List<HeliumTransactionPriceOracleV1>>>
-      listOracleActivityForOracle(
+  Future<HeliumPagedResponse<List<HeliumTransactionPriceOracleV1>>> getActivity(
     String address, {
     DateTime? minTime,
     DateTime? maxTime,
@@ -543,8 +539,7 @@ class HeliumOraclePricesClient {
   ///
   /// If no predictions are returned, the current HNT Oracle Price is valid
   /// for at least 1 hour.
-  Future<HeliumResponse<List<HeliumOraclePricePrediction>>>
-      getPredictedOraclePrices() {
+  Future<HeliumResponse<List<HeliumOraclePricePrediction>>> getPredicted() {
     return _client._doRequest(HeliumPagedRequest(
       path: '/v1/oracle/predictions',
       extractResponse: (json) => HeliumRequest.mapDataList(
@@ -562,7 +557,7 @@ class HeliumTransactionsClient {
   HeliumTransactionsClient._(this._client);
 
   /// Fetches the transaction for a given hash.
-  Future<HeliumResponse<HeliumTransaction>> getTransaction(String hash) async {
+  Future<HeliumResponse<HeliumTransaction>> get(String hash) async {
     return _client._doRequest(HeliumRequest(
       path: '/v1/transactions/$hash',
       extractResponse: (json) => HeliumTransaction.fromJson(json['data']),

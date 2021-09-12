@@ -20,7 +20,7 @@ const PUBLISHED_ORACLES = {
 /// submissions they've made
 void main() async {
   final client = HeliumBlockchainClient();
-  var resp = await client.prices.listOracleActivity();
+  var resp = await client.prices.getAllActivity();
   final earliestRecordTimes = HashMap<String, DateTime>();
   final latestRecordTimes = HashMap<String, DateTime>();
   final recordCounts = HashMap<String, int>();

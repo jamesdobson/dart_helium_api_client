@@ -7,7 +7,7 @@ void main() {
 
     test('Get a specific transaction of known type', () async {
       var resp = await client.transactions
-          .getTransaction('VSO7aKH9uiCuWUNzb5rPddlq-m-kvaMeVeufUQisjbo');
+          .get('VSO7aKH9uiCuWUNzb5rPddlq-m-kvaMeVeufUQisjbo');
 
       expect(resp.data.type, HeliumTransactionType.ADD_GATEWAY_V1);
 
@@ -19,7 +19,7 @@ void main() {
     test('Get a specific transaction of unknown type (genesis gateway)',
         () async {
       var resp = await client.transactions
-          .getTransaction('iEDrnBsQByoty59AqR1w44BQmjKpT4XUnlewohE_ZsI');
+          .get('iEDrnBsQByoty59AqR1w44BQmjKpT4XUnlewohE_ZsI');
 
       expect(resp.data.type, HeliumTransactionType.get('gen_gateway_v1'));
 
