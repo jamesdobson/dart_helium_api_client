@@ -1,3 +1,4 @@
+import 'package:helium_api_client/src/common.dart';
 import 'package:helium_api_client/src/converters.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -5,6 +6,14 @@ import 'shared.dart';
 
 part 'hotspots.g.dart';
 
+/// Detailed hotspot information.
+///
+/// This information is derived by the Helium API from a combination of
+/// blockchain transactions and P2P data. For example, the information about
+/// the hotspot's location is derived from assert_location_v1 and _v2
+/// transactions, and the [payer] and [blockAdded] are derived from the
+/// add_gateway_v1 transaction. On the other hand, [status] is derived from
+/// P2P queries.
 @JsonSerializable()
 class HeliumHotspot {
   /// The B58 address of the hotspot.
@@ -45,7 +54,7 @@ class HeliumHotspot {
   @JsonKey(name: 'location_hex')
   final String? locationHex;
 
-  /// The region (city) where the hotspot is located.
+  /// The reverse geocode of the hotspot's location.
   final HeliumGeocode geocode;
 
   /// The name 3-word animal name of the hotspot
@@ -107,6 +116,7 @@ class HeliumHotspot {
   /// This is the value from the most recent location assertion transaction.
   final int elevation;
 
+  /// Creates a new instance.
   HeliumHotspot({
     required this.address,
     required this.block,
@@ -131,19 +141,28 @@ class HeliumHotspot {
     required this.elevation,
   });
 
+  /// Creates an instance from a map derived from the JSON serialization.
   factory HeliumHotspot.fromJson(Map<String, dynamic> json) =>
       _$HeliumHotspotFromJson(json);
 
+  /// Creates a map suitable for serialization to JSON.
   Map<String, dynamic> toJson() => _$HeliumHotspotToJson(this);
 }
 
+/// An enumeration of the mode in which a hotspot operates.
 class HeliumHotspotMode {
+  /// The value indicating the mode, as it is represented in JSON by the
+  /// Helium API.
   final String value;
+
   const HeliumHotspotMode._internal(this.value);
 
   @override
   String toString() => 'HeliumHotspotFilterMode.$value';
 
+  /// Given a hotspot mode from JSON, return the enumerated value.
+  ///
+  /// Throws [HeliumException] if the mode is not recognized.
   static HeliumHotspotMode parse(String s) {
     final mode = _lookup[s];
 
@@ -151,11 +170,21 @@ class HeliumHotspotMode {
       return mode;
     }
 
-    throw Exception('Unknown hotspot mode "$s"');
+    throw HeliumException('Unknown hotspot mode "$s"');
   }
 
+  /// Data Only hotspots use Validators to get information about the Helium
+  /// blockchain and get rewarded for forwarding Data Packets.
   static const DATA_ONLY = HeliumHotspotMode._internal('dataonly');
+
+  /// Full hotspots maintain a full copy of the Helium blockchain, participate
+  /// in Proof of Coverage rewards, and get rewarded for forwarding Data
+  /// Packets.
   static const FULL = HeliumHotspotMode._internal('full');
+
+  /// Light hotspots use Validators to get information about the Helium
+  /// blockchain, participate in Proof of Coverage rewards, and get rewarded
+  /// for forwarding Data Packets.
   static const LIGHT = HeliumHotspotMode._internal('light');
 
   static const Map<String, HeliumHotspotMode> _lookup = {
@@ -175,6 +204,10 @@ String _heliumHotspotModeToJson(HeliumHotspotMode mode) {
   return mode.value;
 }
 
+/// The status of a hotspot.
+///
+/// Objects from this class are only ever seen in the context of a
+/// [HeliumHotspot], they are not constructed independently.
 @JsonSerializable()
 class HeliumHotspotStatus {
   /// The highest block synced by the hotspot when this status update was
@@ -194,6 +227,7 @@ class HeliumHotspotStatus {
   @JsonKey(name: 'listen_addrs')
   final List<String>? listenAddresses;
 
+  /// Creates a new instance.
   HeliumHotspotStatus({
     this.height,
     required this.online,
@@ -201,12 +235,16 @@ class HeliumHotspotStatus {
     this.listenAddresses,
   });
 
+  /// Creates an instance from a map derived from the JSON serialization.
   factory HeliumHotspotStatus.fromJson(Map<String, dynamic> json) =>
       _$HeliumHotspotStatusFromJson(json);
 
+  /// Creates a map suitable for serialization to JSON.
   Map<String, dynamic> toJson() => _$HeliumHotspotStatusToJson(this);
 }
 
+/// A reward earned by a hotspot as it mines HNT by participating in Proof of
+/// Coverage and forwards Data Packets.
 @JsonSerializable()
 class HeliumHotspotReward {
   /// The address of the account to which the reward was paid.
@@ -231,6 +269,7 @@ class HeliumHotspotReward {
   )
   final DateTime timestamp;
 
+  /// Creates a new instance.
   HeliumHotspotReward({
     required this.account,
     required this.gateway,
@@ -240,23 +279,30 @@ class HeliumHotspotReward {
     required this.timestamp,
   });
 
+  /// Creates an instance from a map derived from the JSON serialization.
   factory HeliumHotspotReward.fromJson(Map<String, dynamic> json) =>
       _$HeliumHotspotRewardFromJson(json);
 
+  /// Creates a map suitable for serialization to JSON.
   Map<String, dynamic> toJson() => _$HeliumHotspotRewardToJson(this);
 }
 
+/// A sum of the rewards earned by a hotspot from participating in
+/// multiple Proof of Coverage transactions and forwarding Data Packets.
 @JsonSerializable()
 class HeliumHotspotRewardTotal {
   /// The sum of rewards earned, in bones (1 HNT == 100 000 000 bones)
   final int sum;
 
+  /// Creates a new instance.
   HeliumHotspotRewardTotal({
     required this.sum,
   });
 
+  /// Creates an instance from a map derived from the JSON serialization.
   factory HeliumHotspotRewardTotal.fromJson(Map<String, dynamic> json) =>
       _$HeliumHotspotRewardTotalFromJson(json);
 
+  /// Creates a map suitable for serialization to JSON.
   Map<String, dynamic> toJson() => _$HeliumHotspotRewardTotalToJson(this);
 }

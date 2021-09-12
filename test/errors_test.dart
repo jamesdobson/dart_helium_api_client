@@ -4,7 +4,8 @@ import 'package:test/test.dart';
 void main() {
   group('Error Handling Tests', () {
     test('Error 404 not found', () async {
-      final client = HeliumClient(baseUrl: 'https://api.helium.io/err');
+      final client =
+          HeliumBlockchainClient(baseUrl: 'https://api.helium.io/err');
 
       try {
         await client.prices.getCurrentOraclePrice();
@@ -24,7 +25,8 @@ void main() {
     });
 
     test('Error during host lookup', () async {
-      final client = HeliumClient(baseUrl: 'https://apierr.helium.io');
+      final client =
+          HeliumBlockchainClient(baseUrl: 'https://apierr.helium.io');
 
       try {
         await client.prices.getCurrentOraclePrice();

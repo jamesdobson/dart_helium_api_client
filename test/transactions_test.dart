@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('Transactions API Integration Tests', () {
-    final client = HeliumClient();
+    final client = HeliumBlockchainClient();
 
     test('Get a specific transaction of known type', () async {
       var resp = await client.transactions

@@ -1,16 +1,16 @@
 # Helium API Client Library for Dart
 Provides a client for the [Helium API][api] in the Dart language.
 
-Currently, it supports 3 secions of the Blockchain API: Hotspots,
+Currently, it supports 3 sections of the Blockchain API: Hotspots,
 Oracle Prices, and Transactions.
 
-[api]: https://docs.helium.com/api/
+[api]: https://docs.helium.com/api/blockchain/introduction
 
 ## Usage
 Get a client instance:
 
 ```dart
-final client = HeliumClient();
+final client = HeliumBlockchainClient();
 ```
 
 You can make API calls on the methods of:
@@ -22,7 +22,7 @@ API calls return a `HeliumResponse` object. You can get the results
 from the `data` property on the response.
 
 ```dart
-final client = HeliumClient();
+final client = HeliumBlockchainClient();
 var resp = await client.prices.getCurrentOraclePrice();
 print(resp.data.price);
 ```
@@ -32,7 +32,7 @@ next page of results (also a `HeliumPagedResponse` object), call
 `getNextPage` passing the previous page response:
 
 ```dart
-final client = HeliumClient();
+final client = HeliumBlockchainClient();
 var resp = await client.prices.getCurrentAndHistoricalOraclePrices();
 print(resp.data.length);
 resp = await client.getNextPage(resp);

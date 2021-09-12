@@ -85,9 +85,9 @@ HeliumTransactionAssertLocationV2 _$HeliumTransactionAssertLocationV2FromJson(
       location: json['location'] as String,
       lat: (json['lat'] as num).toDouble(),
       lng: (json['lng'] as num).toDouble(),
+      nonce: json['nonce'] as int,
       elevation: json['elevation'] as int,
       gain: json['gain'] as int,
-      nonce: json['nonce'] as int,
     );
 
 Map<String, dynamic> _$HeliumTransactionAssertLocationV2ToJson(
@@ -105,9 +105,9 @@ Map<String, dynamic> _$HeliumTransactionAssertLocationV2ToJson(
       'location': instance.location,
       'lat': instance.lat,
       'lng': instance.lng,
+      'nonce': instance.nonce,
       'elevation': instance.elevation,
       'gain': instance.gain,
-      'nonce': instance.nonce,
     };
 
 HeliumTransactionConsensusGroupV1 _$HeliumTransactionConsensusGroupV1FromJson(
@@ -174,8 +174,7 @@ HeliumTransactionPoCReceiptsV1 _$HeliumTransactionPoCReceiptsV1FromJson(
       challengerLat: (json['challenger_lat'] as num).toDouble(),
       challengerLon: (json['challenger_lon'] as num).toDouble(),
       path: (json['path'] as List<dynamic>)
-          .map((e) =>
-              HeliumPoCReceiptsPathElement.fromJson(e as Map<String, dynamic>))
+          .map((e) => HeliumPoCPathElement.fromJson(e as Map<String, dynamic>))
           .toList(),
       secret: json['secret'] as String,
       onionKeyHash: json['onion_key_hash'] as String,
@@ -202,17 +201,15 @@ Map<String, dynamic> _$HeliumTransactionPoCReceiptsV1ToJson(
       'fee': instance.fee,
     };
 
-HeliumPoCReceiptsPathElement _$HeliumPoCReceiptsPathElementFromJson(
+HeliumPoCPathElement _$HeliumPoCPathElementFromJson(
         Map<String, dynamic> json) =>
-    HeliumPoCReceiptsPathElement(
+    HeliumPoCPathElement(
       witnesses: (json['witnesses'] as List<dynamic>)
-          .map((e) =>
-              HeliumPoCReceiptsWitness.fromJson(e as Map<String, dynamic>))
+          .map((e) => HeliumPoCWitness.fromJson(e as Map<String, dynamic>))
           .toList(),
       receipt: json['receipt'] == null
           ? null
-          : HeliumPoCReceiptsReceipt.fromJson(
-              json['receipt'] as Map<String, dynamic>),
+          : HeliumPoCReceipt.fromJson(json['receipt'] as Map<String, dynamic>),
       geocode: json['geocode'] == null
           ? null
           : HeliumGeocode.fromJson(json['geocode'] as Map<String, dynamic>),
@@ -224,8 +221,8 @@ HeliumPoCReceiptsPathElement _$HeliumPoCReceiptsPathElementFromJson(
       challengeeLon: (json['challengee_lon'] as num).toDouble(),
     );
 
-Map<String, dynamic> _$HeliumPoCReceiptsPathElementToJson(
-        HeliumPoCReceiptsPathElement instance) =>
+Map<String, dynamic> _$HeliumPoCPathElementToJson(
+        HeliumPoCPathElement instance) =>
     <String, dynamic>{
       'witnesses': instance.witnesses,
       'receipt': instance.receipt,
@@ -238,9 +235,8 @@ Map<String, dynamic> _$HeliumPoCReceiptsPathElementToJson(
       'challengee_lon': instance.challengeeLon,
     };
 
-HeliumPoCReceiptsWitness _$HeliumPoCReceiptsWitnessFromJson(
-        Map<String, dynamic> json) =>
-    HeliumPoCReceiptsWitness(
+HeliumPoCWitness _$HeliumPoCWitnessFromJson(Map<String, dynamic> json) =>
+    HeliumPoCWitness(
       timestamp: json['timestamp'] as int,
       gateway: json['gateway'] as String,
       owner: json['owner'] as String,
@@ -256,8 +252,7 @@ HeliumPoCReceiptsWitness _$HeliumPoCReceiptsWitnessFromJson(
       channel: json['channel'] as int?,
     );
 
-Map<String, dynamic> _$HeliumPoCReceiptsWitnessToJson(
-        HeliumPoCReceiptsWitness instance) =>
+Map<String, dynamic> _$HeliumPoCWitnessToJson(HeliumPoCWitness instance) =>
     <String, dynamic>{
       'timestamp': instance.timestamp,
       'gateway': instance.gateway,
@@ -274,9 +269,8 @@ Map<String, dynamic> _$HeliumPoCReceiptsWitnessToJson(
       'channel': instance.channel,
     };
 
-HeliumPoCReceiptsReceipt _$HeliumPoCReceiptsReceiptFromJson(
-        Map<String, dynamic> json) =>
-    HeliumPoCReceiptsReceipt(
+HeliumPoCReceipt _$HeliumPoCReceiptFromJson(Map<String, dynamic> json) =>
+    HeliumPoCReceipt(
       timestamp: json['timestamp'] as int,
       gateway: json['gateway'] as String,
       signal: json['signal'] as int,
@@ -284,8 +278,7 @@ HeliumPoCReceiptsReceipt _$HeliumPoCReceiptsReceiptFromJson(
       data: json['data'] as String,
     );
 
-Map<String, dynamic> _$HeliumPoCReceiptsReceiptToJson(
-        HeliumPoCReceiptsReceipt instance) =>
+Map<String, dynamic> _$HeliumPoCReceiptToJson(HeliumPoCReceipt instance) =>
     <String, dynamic>{
       'timestamp': instance.timestamp,
       'gateway': instance.gateway,

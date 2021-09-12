@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'shared.g.dart';
 
+/// The reverse geocode of a location, to the granularity of a street.
 @JsonSerializable()
 class HeliumGeocode {
   /// The long city name, e.g. 'San Francisco' or 'Brookline'
@@ -43,6 +44,7 @@ class HeliumGeocode {
   @JsonKey(name: 'city_id')
   final String? cityId;
 
+  /// Creates a new instance.
   HeliumGeocode({
     this.longCity,
     this.longCountry,
@@ -55,8 +57,10 @@ class HeliumGeocode {
     this.cityId,
   });
 
+  /// Creates an instance from a map derived from the JSON serialization.
   factory HeliumGeocode.fromJson(Map<String, dynamic> json) =>
       _$HeliumGeocodeFromJson(json);
 
+  /// Creates a map suitable for serialization to JSON.
   Map<String, dynamic> toJson() => _$HeliumGeocodeToJson(this);
 }

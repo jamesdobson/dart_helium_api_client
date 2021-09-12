@@ -2,12 +2,22 @@ import 'package:helium_api_client/src/model/hotspots.dart';
 import 'package:helium_api_client/src/model/oracle_prices.dart';
 import 'package:helium_api_client/src/model/transactions.dart';
 
+import 'common.dart';
 import 'request.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class HeliumClient {
+/// A client for the Helium Blockchain API.
+///
+/// For information about the API itself, see:
+/// https://docs.helium.com/api/blockchain/introduction
+class HeliumBlockchainClient {
+  /// Stable, scalable production service. Connected to mainnet.
   static const String STABLE_URL = 'https://api.helium.io';
+
+  /// Beta, scalable endpoint for new features and tests. Currently connected
+  /// to mainnet. This endpoint is used for feature dvelopment. Submitted
+  /// transactions may get dropped.
   static const String BETA_URL = 'https://api.helium.wtf';
 
   final Uri _base;
@@ -21,35 +31,25 @@ class HeliumClient {
   /// Operations on the Oracle Prices API. (https://docs.helium.com/api/blockchain/oracle-prices)
   late final HeliumOraclePricesClient prices;
 
-  HeliumClient({
+  /// Creates a new client for the Helium Blockchain API.
+  ///
+  /// The client uses the Stable API endpoint by default. To use a different
+  /// API endpoint, specify [baseUrl]. For example, to use the Beta API, set
+  /// [baseUrl] to [BETA_URL].
+  HeliumBlockchainClient({
     String baseUrl = STABLE_URL,
   }) : _base = Uri.parse(baseUrl) {
-    hotspots = HeliumHotspotClient(this);
-    prices = HeliumOraclePricesClient(this);
-    transactions = HeliumTransactionsClient(this);
+    hotspots = HeliumHotspotClient._(this);
+    prices = HeliumOraclePricesClient._(this);
+    transactions = HeliumTransactionsClient._(this);
   }
 
-  Future<http.Response> _do<T>(final Uri uri) async {
-    final resp;
-
-    try {
-      resp = await http.get(uri);
-    } catch (e) {
-      throw HeliumException('Network error', uri: uri, cause: e);
-    }
-
-    if (resp.statusCode >= 400) {
-      throw HeliumException(
-          'HTTP error (${resp.statusCode} ${resp.reasonPhrase})',
-          uri: uri);
-    }
-
-    if (resp.statusCode >= 300) {
-      throw HeliumException('Unexpected HTTP redirect (${resp.statusCode})',
-          uri: uri);
-    }
-
-    return resp;
+  /// Gets the page of results following the given page.
+  ///
+  /// Check [hasNextPage] on the response object before calling this method.
+  Future<HeliumPagedResponse<T>> getNextPage<T>(
+      final HeliumPagedResponse<T> response) async {
+    return _doPagedRequest(response._getNextPageRequest());
   }
 
   Future<HeliumResponse<T>> _doRequest<T>(final HeliumRequest<T> req) async {
@@ -72,7 +72,7 @@ class HeliumClient {
           uri: uri, cause: e, body: resp.body);
     }
 
-    return HeliumResponse<T>(
+    return HeliumResponse<T>._(
       data: data,
     );
   }
@@ -93,44 +93,62 @@ class HeliumClient {
           uri: uri, cause: e, body: resp.body);
     }
 
-    return HeliumPagedResponse<T>(
+    return HeliumPagedResponse<T>._(
       request: req,
       data: data,
       cursor: cursor,
     );
   }
 
-  Future<HeliumPagedResponse<T>> getNextPage<T>(
-      final HeliumPagedResponse<T> response) async {
-    return _doPagedRequest(response._getNextPageRequest());
+  Future<http.Response> _do<T>(final Uri uri) async {
+    final http.Response resp;
+
+    try {
+      resp = await http.get(uri);
+    } catch (e) {
+      throw HeliumException('Network error', uri: uri, cause: e);
+    }
+
+    if (resp.statusCode >= 400) {
+      throw HeliumException(
+          'HTTP error (${resp.statusCode} ${resp.reasonPhrase})',
+          uri: uri);
+    }
+
+    if (resp.statusCode >= 300) {
+      throw HeliumException('Unexpected HTTP redirect (${resp.statusCode})',
+          uri: uri);
+    }
+
+    return resp;
   }
-
-  /*
-  Future<List<D>> readAll<D>(final HeliumPagedResponse<List<D>> response) async {
-
-  };
-  */
 }
 
+/// A response from the Helium API.
 class HeliumResponse<T> {
   /// The response data.
   final T data;
 
-  HeliumResponse({
+  HeliumResponse._({
     required this.data,
   });
 }
 
+/// A one-page response from the Helium API.
+///
+/// To retrieve the next page, pass this to the
+/// [HeliumBlockchainClient.getNextPage] method.
 class HeliumPagedResponse<T> extends HeliumResponse<T> {
   final HeliumPagedRequest<T> _request;
   final String? _cursor;
 
-  HeliumPagedResponse(
+  HeliumPagedResponse._(
       {required data, required HeliumPagedRequest<T> request, String? cursor})
       : _request = request,
         _cursor = cursor,
-        super(data: data);
+        super._(data: data);
 
+  /// True if there is another page of results; false otherwise.
   bool get hasNextPage => _cursor != null;
 
   HeliumPagedRequest<T> _getNextPageRequest() {
@@ -146,11 +164,12 @@ class HeliumPagedResponse<T> extends HeliumResponse<T> {
 }
 
 /// Operations on the Hotspots API.
+///
 /// https://docs.helium.com/api/blockchain/hotspots
 class HeliumHotspotClient {
-  final HeliumClient _client;
+  final HeliumBlockchainClient _client;
 
-  HeliumHotspotClient(this._client);
+  HeliumHotspotClient._(this._client);
 
   /// Lists known hotspots as registered on the blockchain.
   ///
@@ -411,11 +430,12 @@ class HeliumHotspotClient {
 }
 
 /// Operations on the Oracle Prices API.
+///
 /// https://docs.helium.com/api/blockchain/oracle-prices
 class HeliumOraclePricesClient {
-  final HeliumClient _client;
+  final HeliumBlockchainClient _client;
 
-  HeliumOraclePricesClient(this._client);
+  HeliumOraclePricesClient._(this._client);
 
   /// Gets the current Oracle Price and at which block it took effect.
   Future<HeliumResponse<HeliumOraclePrice>> getCurrentOraclePrice() async {
@@ -523,22 +543,23 @@ class HeliumOraclePricesClient {
   ///
   /// If no predictions are returned, the current HNT Oracle Price is valid
   /// for at least 1 hour.
-  Future<HeliumResponse<List<HeliumOraclePricePredictions>>>
+  Future<HeliumResponse<List<HeliumOraclePricePrediction>>>
       getPredictedOraclePrices() {
     return _client._doRequest(HeliumPagedRequest(
       path: '/v1/oracle/predictions',
       extractResponse: (json) => HeliumRequest.mapDataList(
-          json, (p) => HeliumOraclePricePredictions.fromJson(p)),
+          json, (p) => HeliumOraclePricePrediction.fromJson(p)),
     ));
   }
 }
 
 /// Operations on the Transactions API.
+///
 /// https://docs.helium.com/api/blockchain/transactions
 class HeliumTransactionsClient {
-  final HeliumClient _client;
+  final HeliumBlockchainClient _client;
 
-  HeliumTransactionsClient(this._client);
+  HeliumTransactionsClient._(this._client);
 
   /// Fetches the transaction for a given hash.
   Future<HeliumResponse<HeliumTransaction>> getTransaction(String hash) async {
@@ -546,39 +567,5 @@ class HeliumTransactionsClient {
       path: '/v1/transactions/$hash',
       extractResponse: (json) => HeliumTransaction.fromJson(json['data']),
     ));
-  }
-}
-
-class HeliumException implements Exception {
-  final String message;
-  final Uri? uri;
-  final Object? cause;
-  final String? body;
-
-  const HeliumException(this.message, {this.uri, this.body, this.cause});
-
-  @override
-  String toString() {
-    final buf = StringBuffer(message);
-
-    if (uri != null) {
-      buf.write(' (uri: "');
-      buf.write(uri);
-      buf.write('")');
-    }
-
-    if (cause != null) {
-      buf.write(' (cause: "');
-      buf.write(cause.toString());
-      buf.write('")');
-    }
-
-    if (body != null) {
-      buf.write('\nResponse Body:\n');
-      buf.write(body);
-      buf.write('\n---End of Response Body---\n\n');
-    }
-
-    return buf.toString();
   }
 }

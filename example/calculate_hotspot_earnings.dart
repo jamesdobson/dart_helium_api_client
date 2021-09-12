@@ -6,7 +6,7 @@ final DateTime startTime = DateTime(2021, 1, 1);
 const int PRICE_RESOLUTION = 100000000;
 
 void main() async {
-  final client = HeliumClient();
+  final client = HeliumBlockchainClient();
   final rewards = <HeliumHotspotReward>[];
   var resp = await client.hotspots.getRewards(address, startTime, endTime);
 

@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('Hotspots API Integration Tests', () {
-    final client = HeliumClient();
+    final client = HeliumBlockchainClient();
 
     /// cheesy-brick-mustang in Brookline, MA
     const CHEESY_BRICK_MUSTANG =

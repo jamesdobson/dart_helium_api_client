@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('Oracle Prices API Integration Tests', () {
-    final client = HeliumClient();
+    final client = HeliumBlockchainClient();
 
     test('Get the current Oracle Price', () async {
       var resp = await client.prices.getCurrentOraclePrice();

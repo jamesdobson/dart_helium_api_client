@@ -40,15 +40,15 @@ Map<String, dynamic> _$HeliumOraclePriceStatsToJson(
       'stddev': instance.stddev,
     };
 
-HeliumOraclePricePredictions _$HeliumOraclePricePredictionsFromJson(
+HeliumOraclePricePrediction _$HeliumOraclePricePredictionFromJson(
         Map<String, dynamic> json) =>
-    HeliumOraclePricePredictions(
+    HeliumOraclePricePrediction(
       price: json['price'] as int,
       time: heliumBlockTimeFromJson(json['time'] as int),
     );
 
-Map<String, dynamic> _$HeliumOraclePricePredictionsToJson(
-        HeliumOraclePricePredictions instance) =>
+Map<String, dynamic> _$HeliumOraclePricePredictionToJson(
+        HeliumOraclePricePrediction instance) =>
     <String, dynamic>{
       'price': instance.price,
       'time': heliumBlockTimeToJson(instance.time),

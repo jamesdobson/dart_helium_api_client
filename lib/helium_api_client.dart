@@ -2,6 +2,7 @@
 library helium_api_client;
 
 export 'src/helium_api_client_base.dart';
+export 'src/common.dart';
 
 export 'src/model/hotspots.dart';
 export 'src/model/oracle_prices.dart';

@@ -4,7 +4,7 @@ import 'package:helium_api_client/helium_api_client.dart';
 
 /// Finds all hotspots that map to the same name as at least one other hotspot.
 void main() async {
-  final client = HeliumClient();
+  final client = HeliumBlockchainClient();
   final tally = HashMap<String, int>();
   var response = await client.hotspots.listHotspots();
 
