@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:helium_api_client/helium_api_client.dart';
 
 /// Prints current information about a hotspot, as well as the past locations
@@ -33,8 +35,18 @@ void main() async {
   displayLocationAssertions(resp.data);
 
   while (resp.hasNextPage) {
-    resp = await client.getNextPage(resp);
-    displayLocationAssertions(resp.data);
+    print('getting next page...');
+    try {
+      resp = await client.getNextPage(resp);
+      displayLocationAssertions(resp.data);
+    } on HeliumException catch (e) {
+      if (e.httpStatusCode == 429) {
+        print('  will retry after waiting...');
+        sleep(Duration(seconds: 1));
+      } else {
+        rethrow;
+      }
+    }
   }
 }
 

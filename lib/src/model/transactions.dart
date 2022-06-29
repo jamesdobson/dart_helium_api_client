@@ -240,6 +240,7 @@ class HeliumTransactionAddGatewayV1 extends HeliumTransaction {
   /// The wallet address of the fee payer.
   /// Typically, this will be the address of the hotspot maker's wallet since
   /// they pay the initial hotspot fees.
+  /// For a list, see: https://onboarding.dewi.org/api/v2/makers
   final String payer;
 
   /// Creates a new instance.

@@ -1,3 +1,6 @@
+const String PACKAGE_URL = 'pub.dev/packages/helium_api_client';
+const String PACKAGE_VERSION = '1.0.1';
+
 /// Represents a runtime error from the Helium API client.
 class HeliumException implements Exception {
   /// The error message.
@@ -12,7 +15,20 @@ class HeliumException implements Exception {
   /// The HTTP response body causing this exception, if any.
   final String? body;
 
-  const HeliumException(this.message, {this.uri, this.body, this.cause});
+  /// The HTTP response status code, if any.
+  final int? httpStatusCode;
+
+  /// The HTTP response status reason phrase, if any.
+  final String? httpStatusReason;
+
+  const HeliumException(
+    this.message, {
+    this.uri,
+    this.body,
+    this.cause,
+    this.httpStatusCode,
+    this.httpStatusReason,
+  });
 
   @override
   String toString() {

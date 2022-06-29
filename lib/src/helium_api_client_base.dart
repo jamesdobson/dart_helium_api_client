@@ -104,20 +104,28 @@ class HeliumBlockchainClient {
     final http.Response resp;
 
     try {
-      resp = await http.get(uri);
+      resp = await http
+          .get(uri, headers: {'User-Agent': '$PACKAGE_URL:$PACKAGE_VERSION'});
     } catch (e) {
       throw HeliumException('Network error', uri: uri, cause: e);
     }
 
     if (resp.statusCode >= 400) {
       throw HeliumException(
-          'HTTP error (${resp.statusCode} ${resp.reasonPhrase})',
-          uri: uri);
+        'HTTP error (${resp.statusCode} ${resp.reasonPhrase})',
+        uri: uri,
+        httpStatusCode: resp.statusCode,
+        httpStatusReason: resp.reasonPhrase,
+      );
     }
 
     if (resp.statusCode >= 300) {
-      throw HeliumException('Unexpected HTTP redirect (${resp.statusCode})',
-          uri: uri);
+      throw HeliumException(
+        'Unexpected HTTP redirect (${resp.statusCode})',
+        uri: uri,
+        httpStatusCode: resp.statusCode,
+        httpStatusReason: resp.reasonPhrase,
+      );
     }
 
     return resp;

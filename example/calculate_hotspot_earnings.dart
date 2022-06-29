@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:helium_api_client/helium_api_client.dart';
 
 final String address = '11yXFNu9Je9gvVfyuA8jS8z6faNcZW7kPwPApWYThTk416LGmU';
@@ -14,23 +16,46 @@ void main() async {
   print('Retrieved ${rewards.length}...');
 
   while (resp.hasNextPage) {
-    resp = await client.getNextPage(resp);
-    rewards.addAll(resp.data);
-    print('Retrieved ${rewards.length}...');
+    try {
+      resp = await client.getNextPage(resp);
+      rewards.addAll(resp.data);
+      print('Retrieved ${rewards.length}...');
+    } on HeliumException catch (e) {
+      if (e.httpStatusCode == 429) {
+        sleep(Duration(seconds: 1));
+      } else {
+        rethrow;
+      }
+    }
   }
 
   var sumUSD = BigInt.zero;
   var sumHNT = BigInt.zero;
+  var row = 1;
 
   print(
-      'Block,Timestamp,Reward (HNT),HNT Price in hundred-millionths of USD,Approx reward in USD');
+      'Block,Timestamp,Reward (HNT),HNT Price in hundred-millionths of USD,Approx reward in USD,Calculated Reward in USD');
   for (final r in rewards) {
-    final resp = await client.prices.getByBlock(r.block);
+    HeliumResponse<HeliumOraclePrice>? resp;
+
+    while (resp == null) {
+      try {
+        resp = await client.prices.getByBlock(r.block);
+      } on HeliumException catch (e) {
+        if (e.httpStatusCode == 429) {
+          sleep(Duration(seconds: 1));
+        } else {
+          rethrow;
+        }
+      }
+    }
+
     final hntPrice = resp.data.price;
     final usdAmount = hntPrice / PRICE_RESOLUTION * r.amount / PRICE_RESOLUTION;
 
+    row += 1;
     print(
-      '${r.block},${timestampForCSV(r.timestamp)},${r.amount},$hntPrice,${usdAmount.toStringAsFixed(2)}',
+      '${r.block},${timestampForCSV(r.timestamp)},${r.amount},$hntPrice,${usdAmount.toStringAsFixed(2)},=C$row/$PRICE_RESOLUTION*D$row/$PRICE_RESOLUTION',
     );
 
     final hntPriceBones = BigInt.from(hntPrice);
